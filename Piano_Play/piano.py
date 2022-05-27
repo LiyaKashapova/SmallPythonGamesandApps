@@ -27,7 +27,7 @@ for i in range(8):
 @play.when_program_starts
 def start():
     pygame.mixer_music.load('hello.mp3')
-    pygame.mixer_music.play()
+    pygame.mixer_music.run()
 
 
 @kc_m.when_clicked

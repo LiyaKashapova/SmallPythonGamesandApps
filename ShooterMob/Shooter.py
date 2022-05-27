@@ -79,7 +79,7 @@ win = f.render('YOU WON!', True, (154, 38, 99))
 lose = f.render('YOU LOST!', True, (154, 38, 99))
 f = font.SysFont('Impact', 40)
 
-press = f.render('Press P to play again...', True, (245, 245, 245))
+press = f.render('Press P to run again...', True, (245, 245, 245))
 w.blit(f.render('Don''t let the monsters get through!', True, (154, 38, 99)), (200, 120))
 w.blit(f.render('Each                diminishes your allies''s morale', True, (154, 38, 99)), (150, 200))
 w.blit(transform.scale(image.load(resource_path('sphere.png')), (60, 50)), (250, 200))
