@@ -2,7 +2,7 @@ from pygame import *
 
 window = display.set_mode((700, 500))
 display.set_caption("Догонялки")
-background = transform.scale(image.load("C:\\Users\\13\\PycharmProjects\\Labirynth\\back.jpg"), (700, 500))
+background = transform.scale(image.load("/Labirynth/back.jpg"), (700, 500))
 
 c = {
     's1': [100, 300],
@@ -11,8 +11,8 @@ c = {
 
 speed = 10
 
-s1 = transform.scale(image.load('C:\\Users\\13\\PycharmProjects\\Labirynth\\monkey.png'), (100, 100))
-s2 = transform.scale(image.load('C:\\Users\\13\\PycharmProjects\\Labirynth\\tiger.png'), (100, 100))
+s1 = transform.scale(image.load('/Labirynth/monkey.png'), (100, 100))
+s2 = transform.scale(image.load('/Labirynth/tiger.png'), (100, 100))
 
 
 run = True

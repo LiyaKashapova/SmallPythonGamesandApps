@@ -1,19 +1,23 @@
 from pygame import *
 import time as timer
 
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-GREEN = (0, 255, 0)
-RED = (255, 0, 0)
-BLUE = (0, 0, 255)
-
 
 class Player(sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = transform.scale(image.load('saitama.png'), (50, 100))
+        self.frames_r = [transform.scale(image.load('Player/run1.png'), (200, 200)),
+                         transform.scale(image.load('Player/run2.png'), (200, 200)),
+                         transform.scale(image.load('Player/run3.png'), (200, 200))]
+        self.frames_l = [transform.flip(self.frames_r[0], True, False), transform.flip(self.frames_r[1], True, False),
+                         transform.flip(self.frames_r[2], True, False)]
+        self.jump_i = transform.scale(image.load('Player/jump.png'), (200, 200))
+        self.fall = transform.scale(image.load('Player/fall.png'), (200, 200))
+        self.stand = transform.scale(image.load('Player/stand.png'), (200, 200))
+        self.cheer = transform.scale(image.load('Player/cheer.png'), (200, 200))
+        self.image = self.stand
         self.rect = self.image.get_rect()
-        self.rect.x = 100
+        self.direction = "r"
+        self.rect.x = self.image.get_width()
         self.rect.y = self.image.get_height()
         self.sx = 0
         self.sy = 0
@@ -27,6 +31,13 @@ class Player(sprite.Sprite):
         if self.rect.y >= wh - self.rect.height and self.sy >= 0:
             self.sy = 0
             self.rect.y = wh - self.rect.height
+        self.rect.y += 1
+        platforms = sprite.spritecollide(self, self.level.platforms, False)
+        self.rect.y -= 1
+        if len(platforms) > 0 or self.sy == 0:
+            self.image = self.stand
+        else:
+            self.image = self.fall
 
     def jump(self):
         self.rect.y += 1
@@ -34,10 +45,17 @@ class Player(sprite.Sprite):
         self.rect.y -= 1
         if len(platforms) > 0 or self.rect.bottom >= wh:
             self.sy = -10
+        self.image = self.jump_i
 
     def update(self):
         self.calc_grav()
         self.rect.x += self.sx
+        pos = self.rect.x + self.level.world_shift
+        frame = (pos // 30) % len(self.frames_r)
+        if self.direction == "r" and self.sx != 0:
+            self.image = self.frames_r[frame]
+        elif self.direction == "l" and self.sx != 0:
+            self.image = self.frames_l[frame]
         blocks = sprite.spritecollide(self, self.level.platforms, False)
         for block in blocks:
             if self.sx > 0:
@@ -130,11 +148,11 @@ class Level_1(Level):
             block.rect.y = platform[3]
             block.player = self.player
             self.platforms.add(block)
-        block = MovingPlatform('rocks.jpg', 70, 40)
+        block = MovingPlatform('rocks.jpg', 200, 70)
         block.rect.x = 1350
         block.rect.y = 280
         block.bl = 1350
-        block.br = 1600
+        block.br = 1500
         block.sx = 1
         block.player = self.player
         block.level = self
@@ -190,8 +208,10 @@ while run:
         if e.type == KEYDOWN:
             if e.key == K_a:
                 player.sx = -5
+                player.direction = 'l'
             if e.key == K_d:
                 player.sx = 5
+                player.direction = 'r'
             if e.key == K_SPACE:
                 player.jump()
         if e.type == KEYUP:
@@ -220,7 +240,7 @@ while run:
             cur_level = levels[level_num]
             player.level = cur_level
         else:
-            w.blit(f.render('You Won!', True, (180, 0, 0)), (ww/2 - 100, wh/2))
+            w.blit(f.render('You Won!', True, (180, 0, 0)), (ww / 2 - 100, wh / 2))
             display.update()
             timer.sleep(3)
             run = False
