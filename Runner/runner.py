@@ -1,0 +1,227 @@
+from pygame import *
+from random import randint
+import time as timer
+
+
+class Runner(sprite.Sprite):
+    state = 'idle'  # idle, run, jump, fall, slide, cheer
+    r_frame = rate = 0
+
+    def __init__(self):
+        sprite.Sprite.__init__(self)
+        self.i_idle = image.load("Player/idle.png")
+        self.i_jump = image.load("Player/jump.png")
+        self.i_fall = image.load("Player/fall.png")
+        self.i_slide = image.load("Player/slide.png")
+        self.i_run = [image.load("Player/run1.png"), image.load("Player/run2.png"), image.load("Player/run3.png")]
+        self.i_cheer = [image.load("Player/cheer1.png"), image.load("Player/cheer2.png")]
+        self.image = self.i_idle
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = 500, wh - self.rect.height - 100
+
+    def run(self):
+        if self.rate == 5:
+            self.r_frame += 1
+            self.rate = 0
+        if self.r_frame == 3:
+            self.r_frame = 0
+        self.rate += 1
+        self.rect.y = wh - self.rect.height - 100
+        self.image = self.i_run[self.r_frame]
+
+    def jump(self):
+        if self.rect.y < wh - self.rect.height - 400:
+            self.state = 'fall'
+        else:
+            self.image = self.i_jump
+            self.rect.y -= 30
+
+    def fall(self):
+        if self.rect.y >= wh - self.rect.height - 100:
+            self.state = 'run'
+        else:
+            self.image = self.i_fall
+            self.rect.y += 25
+
+    def slide(self):
+        self.image = self.i_slide
+        self.rect.y = wh - self.rect.height - 50
+
+    def cheer(self):
+        if self.rate == 7:
+            self.rate = 0
+            if self.r_frame == 0:
+                self.r_frame = 1
+            else:
+                self.r_frame = 0
+            self.rect.y = wh - self.rect.height - 100
+            self.image = self.i_cheer[self.r_frame]
+        self.rate += 1
+
+    def update(self):
+        if self.state == 'idle':
+            self.image = self.i_idle
+        elif self.state == 'run':
+            self.run()
+        elif self.state == 'jump':
+            self.jump()
+        elif self.state == 'fall':
+            self.fall()
+        elif self.state == 'slide':
+            self.slide()
+        else:
+            self.cheer()
+        c = self.rect.center
+        self.rect = self.image.get_rect()
+        self.rect.center = c
+        w.blit(self.image, (self.rect.x, self.rect.y))
+
+
+class Obstacle(sprite.Sprite):
+    def __init__(self):
+        sprite.Sprite.__init__(self)
+        self.image = transform.scale(image.load('boulder.png'), (200, 100))
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = randint(ww + 200, ww + 600), randint(300, 700)
+        self.speed = 25
+
+    def update(self):
+        if self.rect.x < -200:
+            self.rect.x, self.rect.y = randint(ww + 200, ww + 600), randint(300, 700)
+        self.rect.x -= self.speed
+        w.blit(self.image, (self.rect.x, self.rect.y))
+
+
+class Monster(sprite.Sprite):
+    def __init__(self):
+        sprite.Sprite.__init__(self)
+        self.image = transform.scale(image.load('ghost.png'), (700, 600))
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = -50, 100
+
+    def draw(self):
+        w.blit(self.image, (self.rect.x, self.rect.y))
+
+
+class Torch(sprite.Sprite):
+    cur_frame = rate = 0
+
+    def __init__(self, x):
+        sprite.Sprite.__init__(self)
+        self.frames = []
+        for n in range(1, 8):
+            self.frames.append(transform.scale(image.load('Torch/torch%s.png' % n), (50, 200)))
+        self.image = self.frames[0]
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, 150)
+
+    def update(self):
+        self.image = self.frames[self.cur_frame]
+        if self.cur_frame == 6:
+            self.cur_frame = 0
+        if self.rate == 2:
+            self.cur_frame += 1
+            self.rate = 0
+        self.rate += 1
+        if self.rect.x < -50:
+            self.rect.center = (self.rect.x + 1250, 150)
+        else:
+            self.rect.x -= 5
+
+
+init()
+ww = 1200
+wh = 800
+w = display.set_mode((1200, 800))
+display.set_caption('Run for your life!')
+display.set_icon(transform.scale(image.load('icon.png'), (50, 50)))
+mouse.set_visible(False)
+back = transform.scale(image.load('back.png'), (ww, wh))
+clock = time.Clock()
+
+font.init()
+f = font.SysFont('Verdana', 50, bold=True, italic=True)
+t_stroke = (255, 255, 255)
+t_color = (0, 115, 0)
+lost = [f.render("You were knocked down!", True, t_stroke),
+        f.render("You were knocked down!", True, t_color),
+        f.render("Press any key to try again...", True, t_stroke),
+        f.render("Press any key to try again...", True, t_color)]
+won = [f.render("The ghost disappeared!", True, t_stroke),
+       f.render("The ghost disappeared!", True, t_color), ]
+
+player = Runner()
+torches = sprite.Group(Torch(150), Torch(450), Torch(750), Torch(1050))
+run = play = True
+while run and play:
+    for e in event.get():
+        if e.type == QUIT:
+            run = False
+        if e.type == KEYDOWN:
+            player.state = 'run'
+            play = False
+    w.blit(back, (0, 0))
+    torches.draw(w)
+    w.blit(f.render("Don't get hit by the blocks,", True, t_stroke), (120 - 2, 50 - 2))
+    w.blit(f.render("Don't get hit by the blocks,", True, t_color), (120, 50))
+    w.blit(f.render("while running from ghost!", True, t_stroke), (300 - 2, 150 - 2))
+    w.blit(f.render("while running from ghost!", True, t_color), (300, 150))
+    w.blit(f.render("Press 'w' to jump, press 's' to slide", True, t_stroke), (120 - 2, 300 - 2))
+    w.blit(f.render("Press 'w' to jump, press 's' to slide", True, t_color), (120, 300))
+    w.blit(f.render("Press any key to start the game...", True, t_stroke), (200 - 2, 400 - 2))
+    w.blit(f.render("Press any key to start the game...", True, t_color), (200, 400))
+    player.update()
+    display.update()
+    clock.tick(60)
+
+ghost = Monster()
+obs = sprite.Group()
+obs_rate = 0
+start = timer.time()
+play = True
+while run:
+    for e in event.get():
+        if e.type == QUIT:
+            run = False
+        if e.type == KEYDOWN:
+            if play:
+                if e.key == K_w:
+                    player.state = 'jump'
+                elif e.key == K_s:
+                    player.state = 'slide'
+            else:
+                for o in obs:
+                    o.kill()
+                obs_rate = 0
+                start = timer.time()
+                play = True
+    if play:
+        obs_rate += 1
+        if obs_rate == 5:
+            obs.add(Obstacle())
+        w.blit(back, (0, 0))
+        torches.update()
+        torches.draw(w)
+        ghost.draw()
+        obs.update()
+        player.update()
+        if sprite.spritecollide(player, obs, False):
+            w.blit(lost[0], (300 - 2, 200 - 2))
+            w.blit(lost[1], (300, 200))
+            w.blit(lost[2], (300 - 2, 400 - 2))
+            w.blit(lost[3], (300, 400))
+            play = False
+        if timer.time() - start > 20:
+            while run:
+                for e in event.get():
+                    if e.type == QUIT:
+                        run = False
+                w.blit(back, (0, 0))
+                torches.draw(w)
+                player.state = 'cheer'
+                player.update()
+                w.blit(won[0], (255 - 2, 350 - 2))
+                w.blit(won[1], (255, 350))
+                display.update()
+        display.update()
+        clock.tick(60)
