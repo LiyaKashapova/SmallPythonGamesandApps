@@ -139,10 +139,13 @@ tag_search.clicked.connect(search_tag)
 w.show()
 
 global notes
-if os.path.exists("notes.json"):
+if not os.path.exists("notes.json"):
+    with open("notes.json", "w") as file:
+        notes = {'1': {"текст": "...", "теги": []}}
+        json.dump(notes, file, sort_keys=True, ensure_ascii=False)
+elif os.path.exists("notes.json"):
     with open("notes.json", "r") as file:
         notes = json.load(file)
     notes_l.addItems(notes)
-
 app.setStyle('Fusion')
 app.exec_()

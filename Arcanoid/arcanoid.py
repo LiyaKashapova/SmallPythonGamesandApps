@@ -1,27 +1,27 @@
-import time, pygame
+from pygame import *
+import time as timer
 
 
 class Area:
-    def __init__(self, x=0, y=0, width=10, height=10):
-        self.rect = pygame.Rect(x, y, width, height)
+    def __init__(self, x, y, w, h):
+        self.rect = Rect(x, y, w, h)
 
 
 class Picture(Area):
-    def __init__(self, filename, x=0, y=0, width=10, height=10):
-        Area.__init__(self, x=x, y=y, width=width, height=height)
-        self.image = pygame.transform.scale(pygame.image.load(filename), (width, height))
+    def __init__(self, i, x, y, w, h):
+        Area.__init__(self, x, y, w, h)
+        self.image = transform.scale(image.load(i), (w, h))
 
     def draw(self):
         w.blit(self.image, (self.rect.x, self.rect.y))
 
 
-pygame.init()
-w = pygame.display.set_mode((500, 500))
-pygame.display.set_caption('Mass Effect Arcade')
-pygame.display.set_icon(pygame.image.load('Shepard.png'))
-back = pygame.transform.scale(pygame.image.load('cosmic.png'), (500, 500))
-w.blit(back, (0, 0))
-clock = pygame.time.Clock()
+init()
+w = display.set_mode((500, 500))
+display.set_caption('Mass Effect Arcade')
+display.set_icon(image.load('Shepard.png'))
+back = transform.scale(image.load('cosmic.png'), (500, 500))
+clock = time.Clock()
 
 ball = Picture('crucible.png', 160, 300, 50, 52)
 platform = Picture('normandy.png', 200, 400, 100, 40)
@@ -29,66 +29,50 @@ platform = Picture('normandy.png', 200, 400, 100, 40)
 ma = 9
 ms = []
 for j in range(3):
-    y = 5 + (55 * j)
     x = 5 + (27.5 * j)
+    y = 5 + (55 * j)
     for i in range(ma):
         p = Picture('reaper.png', x, y, 50, 133)
         ms.append(p)
-        x = x + 55
+        x += 55
     ma -= 1
 
-bx = by = 5
-mr = ml = False
-
-pygame.mixer.init()
-mt = pygame.mixer.Sound('battle.mp3')
-rs = pygame.mixer.Sound('reaper.mp3')
-vs = pygame.mixer.Sound('victory.mp3')
+mixer.init()
+mt = mixer.Sound('battle.mp3')
 mt.set_volume(0.1)
 mt.play()
+rs = mixer.Sound('reaper.mp3')
+rs.set_volume(0.1)
+vs = mixer.Sound('victory.mp3')
+vs.set_volume(0.5)
 
-while True:
-    for e in pygame.event.get():
-        if e.type == pygame.QUIT:
-            quit()
-        if e.type == pygame.KEYDOWN:
-            if e.key == pygame.K_d:
+game = mr = ml = False
+bx = by = 5
+
+while not game:
+    for e in event.get():
+        if e.type == QUIT:
+            game = True
+        if e.type == KEYDOWN:
+            if e.key == K_d:
                 mr = True
-            if e.key == pygame.K_a:
+            if e.key == K_a:
                 ml = True
-        if e.type == pygame.KEYUP:
-            if e.key == pygame.K_d:
+        if e.type == KEYUP:
+            if e.key == K_d:
                 mr = False
-            if e.key == pygame.K_a:
+            if e.key == K_a:
                 ml = False
-        if mr:
-            platform.rect.x += 5
-        if ml:
-            platform.rect.x -= 5
+    if mr and platform.rect.x <= (500 - platform.rect.width):
+        platform.rect.x += 5
+    if ml and platform.rect.x >= 5:
+        platform.rect.x -= 5
     ball.rect.x += bx
     ball.rect.y += by
     if ball.rect.y < 0 or ball.rect.colliderect(platform.rect):
         by *= -1
-    if ball.rect.x < 0 or ball.rect.x > 450:
+    if ball.rect.x < 0 or ball.rect.x > (500 - ball.rect.width):
         bx *= -1
-    if ball.rect.y > platform.rect.y + platform.rect.height:
-        w.blit(pygame.font.SysFont('impact', 60).render('YOU LOSE', True, (255, 0, 0)), (140, 220))
-        pygame.display.update()
-        mt.fadeout(1000)
-        rs.set_volume(0.1)
-        rs.play()
-        rs.fadeout(5000)
-        time.sleep(3)
-        quit()
-        exit()
-    if len(ms) == 0:
-        w.blit(pygame.font.SysFont('impact', 60).render('YOU WIN', True, (0, 191, 255)), (150, 220))
-        pygame.display.update()
-        mt.fadeout(500)
-        vs.play()
-        time.sleep(5)
-        quit()
-        exit()
     w.blit(back, (0, 0))
     for m in ms:
         if m.rect.colliderect(ball.rect):
@@ -98,5 +82,19 @@ while True:
             m.draw()
     platform.draw()
     ball.draw()
-    pygame.display.update()
+    if ball.rect.y > platform.rect.y + platform.rect.height:
+        w.blit(font.SysFont('impact', 60).render('YOU LOSE', True, (255, 0, 0)), (140, 220))
+        display.update()
+        mt.fadeout(1000)
+        rs.play()
+        timer.sleep(3)
+        game = True
+    if len(ms) == 0:
+        w.blit(font.SysFont('impact', 60).render('YOU WIN', True, (0, 191, 255)), (150, 220))
+        display.update()
+        mt.fadeout(500)
+        vs.play()
+        timer.sleep(5)
+        game = True
+    display.update()
     clock.tick(40)
