@@ -33,14 +33,17 @@ class Car(GameSprite):
 #  Configuration
 ww = 1200
 wh = 700
-text_c = (255, 255, 255)
+stroke_c = (240, 240, 240)
 back_c = (0, 0, 0)
+text_c = (214, 217, 30)
+
 lives = 3
 
 font.init()
 f = font.SysFont('Verdana', 30, bold=True)
 mixer.init()
 mixer.music.load('car.wav')
+mixer.music.set_volume(0.3)
 crash = mixer.Sound('crash.wav')
 crash.set_volume(0.5)
 lost = mixer.Sound('oh-no.mp3')
@@ -59,7 +62,6 @@ display.set_caption('Traffic')
 display.set_icon(transform.scale(image.load('racing.png'), (50, 50)))
 mouse.set_visible(False)
 
-# Rules
 w.blit(f.render('Press any key to start the game', True, text_c), ((ww / 3) - 50, (wh / 3) + 50))
 display.update()
 run = True
@@ -84,19 +86,19 @@ def save_r_w(to_do):
             top_score = int(s.readline())
             s.close()
     else:
-        s = open("save.dat", 'w')
+        s = open('save.dat', 'w')
         s.write(str(score))
         s.close()
         top_score = score
 
 
-def check_hit(cars):
+def check_hit(cs):
     global player
     global curb
     r = player.rect
     if r.colliderect(curb['left'].rect) or r.colliderect(curb['right'].rect):
         return True
-    if sprite.spritecollide(player, cars, True):
+    if sprite.spritecollide(player, cs, True):
         return True
     return False
 
@@ -104,17 +106,18 @@ def check_hit(cars):
 cars = sprite.Group()
 score = top_score = cars_add_rate = 0
 save_r_w('read')
-mixer.music.play()
+mixer.music.play(-1)
 run = game = True
 while run:
     for e in event.get():
         if e.type == QUIT:
             run = False
-            quit()
-        elif not game and e.type == KEYDOWN:  # Restart the game loop
+        elif not game and e.type == KEYDOWN:
             game = True
             save_r_w('read')
-            for c in cars: c.kill()
+            for c in cars:
+                c.kill()
+            mixer.music.play(-1)
             score = cars_add_rate = 0
     if game:
         w.fill(back_c)
@@ -132,25 +135,31 @@ while run:
         cars.draw(w)
         player.move()
         player.draw()
+        w.blit(f.render('Score: %s' % score, True, back_c), (8, 8))
         w.blit(f.render('Score: %s' % score, True, text_c), (10, 10))
+        w.blit(f.render('Top Score: %s' % top_score, True, back_c), (8, 58))
         w.blit(f.render('Top Score: %s' % top_score, True, text_c), (10, 60))
-        w.blit(f.render('Rest Life: %s' % lives, True, text_c), (10, 110))
+        w.blit(f.render('Lives: %s' % lives, True, back_c), (8, 108))
+        w.blit(f.render('Lives: %s' % lives, True, text_c), (10, 110))
         clock.tick(40)
         display.update()
         if check_hit(cars):
             lives -= 1
             player.rect.x = ww / 2
             player.rect.y = wh - 100
-            for c in cars: c.kill()
+            for c in cars:
+                c.kill()
             mixer.music.stop()
             crash.play()
             timer.sleep(1)
             crash.stop()
-            mixer.music.play()
+            mixer.music.play(-1)
         if lives == 0:
             mixer.music.stop()
             lost.play()
+            w.blit(f.render('Game over', True, back_c), ((ww / 3) + 118, (wh / 3) + 50))
             w.blit(f.render('Game over', True, text_c), ((ww / 3) + 120, (wh / 3) + 50))
+            w.blit(f.render('Press any key to play again', True, back_c), ((ww / 3) - 32, (wh / 3) + 150))
             w.blit(f.render('Press any key to play again', True, text_c), ((ww / 3) - 30, (wh / 3) + 150))
             if score > top_score:
                 save_r_w('')
