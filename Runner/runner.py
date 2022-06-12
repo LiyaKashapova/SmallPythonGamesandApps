@@ -150,6 +150,17 @@ lost = [f.render("You were knocked down!", True, t_stroke),
 won = [f.render("The ghost disappeared!", True, t_stroke),
        f.render("The ghost disappeared!", True, t_color), ]
 
+mixer.init()
+main_s = mixer.Sound('main.mp3')
+main_s.set_volume(0.15)
+main_s.play(-1)
+running = mixer.Channel(1)
+run_s = mixer.Sound('run.mp3')
+jump_s = mixer.Sound('jump.mp3')
+slide_s = mixer.Sound('slide.mp3')
+end_s = mixer.Sound('end.mp3')
+end_s.set_volume(0.2)
+
 player = Runner()
 torches = sprite.Group(Torch(150), Torch(450), Torch(750), Torch(1050))
 run = play = True
@@ -159,6 +170,7 @@ while run and play:
             run = False
         if e.type == KEYDOWN:
             player.state = 'run'
+            running.play(run_s, -1)
             play = False
     w.blit(back, (0, 0))
     torches.draw(w)
@@ -177,17 +189,21 @@ while run and play:
 ghost = Monster()
 obs = sprite.Group()
 obs_rate = 0
-start = timer.time()
 play = True
+start = timer.time()
 while run:
     for e in event.get():
         if e.type == QUIT:
             run = False
-        if e.type == KEYDOWN:
+        elif e.type == KEYDOWN:
             if play:
                 if e.key == K_w:
+                    running.stop()
+                    jump_s.play()
                     player.state = 'jump'
                 elif e.key == K_s:
+                    running.stop()
+                    slide_s.play()
                     player.state = 'slide'
             else:
                 for o in obs:
@@ -196,6 +212,8 @@ while run:
                 start = timer.time()
                 play = True
     if play:
+        if player.state == 'run' and not running.get_busy():
+            running.play(run_s, -1)
         obs_rate += 1
         if obs_rate == 5:
             obs.add(Obstacle())
@@ -210,8 +228,12 @@ while run:
             w.blit(lost[1], (300, 200))
             w.blit(lost[2], (300 - 2, 400 - 2))
             w.blit(lost[3], (300, 400))
+            running.stop()
             play = False
-        if timer.time() - start > 20:
+        if timer.time() - start > 30:
+            mixer.music.stop()
+            main_s.stop()
+            end_s.play()
             while run:
                 for e in event.get():
                     if e.type == QUIT:
