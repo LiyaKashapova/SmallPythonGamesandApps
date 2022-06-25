@@ -54,8 +54,8 @@ while run and play:
         if e.type == KEYDOWN:
             play = False
     w.blit(images['back'], (0, 0))
-    w.blit(f.render("On the distant planet,", True, t_stroke), (118, 50 - 2))
-    w.blit(f.render("On the distant planet,", True, t_color), (120, 50))
+    w.blit(f.render("On a distant planet,", True, t_stroke), (118, 50 - 2))
+    w.blit(f.render("On a distant planet,", True, t_color), (120, 50))
     w.blit(f.render("an alien is trying to eat!", True, t_stroke), (298, 150 - 2))
     w.blit(f.render("an alien is trying to eat!", True, t_color), (300, 150))
     w.blit(f.render("Help him and catch gems by", True, t_stroke), (118, 300 - 2))
