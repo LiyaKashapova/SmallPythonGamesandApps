@@ -1,63 +1,51 @@
-import pygame
-import os
+from pygame import *
 
-def resource_path(relative_path):
-    try:
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
 
 class Key:
-    def __init__(self, cx=0, cy=0):
-        self.rect = pygame.Rect(cx, cy, 50, 100)
+    def __init__(self, cx, cy):
+        self.rect = Rect(cx, cy, 50, 100)
 
-    def draw(self):
-        pygame.draw.rect(w, (255, 255, 255), self.rect)
-        pygame.draw.rect(w, (0, 0, 0), self.rect, 10)
-
-    def collide(self, cx, cy):
-        return self.rect.collidepoint(cx, cy)
+    def draw(self, win):
+        draw.rect(win, (255, 255, 255), self.rect)
+        draw.rect(win, (0, 0, 0), self.rect, 10)
 
 
-pygame.init()
-w = pygame.display.set_mode((500, 500))
-pygame.display.set_caption('Small Piano')
-pygame.display.set_icon(pygame.image.load(resource_path('piano.png')))
-w.fill((152, 251, 152))
-font = pygame.font.SysFont('monotype corsiva', 60)
+init()
+w = display.set_mode((500, 500))
+display.set_caption('Small Piano')
+display.set_icon(image.load('piano.png'))
+sound = image.load('sound.png')
+f = font.SysFont('monotype corsiva', 60)
+n = f.render('That\'s a Small Piano', True, (0, 0, 0))
 notes = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'Lya', 'Si']
-notess = [pygame.mixer.Sound(resource_path('do.mp3')), pygame.mixer.Sound(resource_path('re.mp3')),
-          pygame.mixer.Sound(resource_path('mi.mp3')), pygame.mixer.Sound(resource_path('fa.mp3')),
-          pygame.mixer.Sound(resource_path('sol.mp3')), pygame.mixer.Sound(resource_path('lya.mp3')),
-          pygame.mixer.Sound(resource_path('si.mp3'))]
-sound = pygame.image.load(resource_path('sound.png'))
-clock = pygame.time.Clock()
+notes_s = [mixer.Sound('do.mp3'), mixer.Sound('re.mp3'), mixer.Sound('mi.mp3'), mixer.Sound('fa.mp3'),
+           mixer.Sound('sol.mp3'), mixer.Sound('lya.mp3'), mixer.Sound('si.mp3')]
 
 keys = []
 x = 20
 for i in range(7):
-    key = Key(x, 170)
-    keys.append(key)
+    keys.append(Key(x, 170))
     x += 70
 
-while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            x, y = event.pos
+game = True
+clock = time.Clock()
+while game:
+    for e in event.get():
+        if e.type == QUIT:
+            game = False
+        if e.type == MOUSEBUTTONDOWN and e.button == 1:
+            x, y = e.pos
             for i in range(len(keys)):
-                if keys[i].collide(x, y):
-                    notess[i].play()
-                    cn = font.render(notes[i], True, (0, 0, 0))
+                if keys[i].rect.collidepoint(x, y):
+                    notes_s[i].play()
+                    cn = f.render(notes[i], True, (0, 0, 0))
         else:
-            cn = font.render(' ', True, (0, 0, 0))
-    w.fill((152, 251, 152))
-    for i in range(7):
-        keys[i].draw()
-    w.blit(font.render('Thats a small piano!', True, (0, 0, 0)), (30, 50))
-    w.blit(sound, (30, 250))
-    w.blit(cn, (300, 340))
-    pygame.display.update()
-    clock.tick(40)
+            cn = f.render(' ', True, (0, 0, 0))
+        w.fill((152, 251, 152))
+        for i in range(7):
+            keys[i].draw(w)
+        w.blit(n, (30, 50))
+        w.blit(cn, (300, 340))
+        w.blit(sound, (30, 250))
+        display.update()
+        clock.tick(60)
