@@ -49,7 +49,7 @@ sprites = {
     'Sonic': GameSprite('Sonic', transform.scale(files['Sonic'], (150, 200)), black, 400, 0, 200, 200, 20, 0),
     'Fubuki': GameSprite('Fubuki', transform.scale(files['Fubuki'], (100, 200)), black, 400, 200, 200, 200, 50, 0),
     'Garou': GameSprite('Garou', transform.scale(files['Garou'], (200, 200)), black, 400, 400, 200, 200, 0, 0),
-    'default': GameSprite('rect', None, black, 200, 0, 200, 200, 0, 0),
+    'default': GameSprite('default', None, black, 200, 0, 200, 200, 0, 0),
     'button': GameSprite('button', files['button'], black, 225, 440, 150, 100, 0, 0)
 }
 
@@ -102,7 +102,7 @@ def button_click():
 
 for fi in field:
     for i in fi:
-        if i.name != 'rect':
+        if i.name != 'default':
             i.draw()
 
 while game and play:
@@ -142,7 +142,7 @@ def draw_field():
         x = 0
         for j in range(3):
             name = field[i][j].name
-            field[i][j] = GameSprite(name, files[name].image, sprites[name].color, x, y, sprites[name].rect.width,
+            field[i][j] = GameSprite(name, sprites[name].image, sprites[name].color, x, y, sprites[name].rect.width,
                                      sprites[name].rect.height, sprites[name].sx, sprites[name].sy)
             field[i][j].draw()
             x += 200
@@ -193,25 +193,23 @@ while game and play:
             c = check_win()
             if c == 'Draw':
                 w.fill(white)
-                w.blit(transform.scale(image.load(files[players[0]]),
-                                       (sprites[players[0]].image.get_width() * 2,
-                                        sprites[players[0]].image.get_height() * 2)),
-                       (0 + sprites[players[0]].sx, 130 + sprites[players[0]].sy))
-                w.blit(transform.scale(image.load(files[players[1]]),
-                                       (sprites[players[1]].image.get_width() * 2,
-                                        sprites[players[1]].image.get_height() * 2)),
-                       (300 + sprites[players[1]].sx, 130 + sprites[players[1]].sy))
+                lp, rp = sprites[players[0]], sprites[players[1]]
+                w.blit(transform.scale(files[players[0]], (lp.image.get_width() * 2, lp.image.get_height() * 2)),
+                       (lp.sx, lp.sy + 130))
+                w.blit(transform.scale(files[players[1]], (rp.image.get_width() * 2, rp.image.get_height() * 2)),
+                       (rp.sx + 300, rp.sy + 130))
                 w.blit(f.render('Draw!', True, black), (270, 50))
                 files['draw'].play()
             elif c:
                 w.fill(white)
                 i = sprites[c].image
+                sx_add = 100
                 if c == 'Saitama':
-                    w.blit(transform.scale(image.load(files[c]), (i.get_width() * 2, i.get_height() * 2)),
-                           (150 + sprites[c].sx, 130 + sprites[c].sy))
-                else:
-                    w.blit(transform.scale(image.load(files[c]), (i.get_width() * 2, i.get_height() * 2)),
-                           (100 + sprites[c].sx, 130 + sprites[c].sy))
+                    sx_add = 160
+                elif c == 'Fubuki':
+                    sx_add = 150
+                w.blit(transform.scale(files[c], (i.get_width() * 2, i.get_height() * 2)),
+                       (sprites[c].sx + sx_add, sprites[c].sy + 130))
                 w.blit(f.render('Here\'s our winner!', True, sprites[c].color), (180, 50))
                 files['victory'].play()
         clock.tick(60)
