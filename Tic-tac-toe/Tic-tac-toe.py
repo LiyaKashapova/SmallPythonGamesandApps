@@ -141,33 +141,32 @@ def draw_field():
     for i in range(3):
         x = 0
         for j in range(3):
-            name = field[i][j].name
-            field[i][j] = GameSprite(name, sprites[name].image, sprites[name].color, x, y, sprites[name].rect.width,
-                                     sprites[name].rect.height, sprites[name].sx, sprites[name].sy)
+            s = sprites[field[i][j].name]
+            field[i][j] = GameSprite(field[i][j].name, s.image, s.color, x, y, s.rect.width, s.rect.height, s.sx, s.sy)
             field[i][j].draw()
             x += 200
         y += 200
 
 
 def check_win():
-    for i in range(3):
-        if field[i][0].name != 'default' and field[i][0].name == field[i][1].name == field[i][2].name:
-            return field[i][0].name
-        if field[0][i].name != 'default' and field[0][i].name == field[1][i].name == field[2][i].name:
-            return field[0][i].name
+    for r in range(3):
+        if field[r][0].name != 'default' and field[r][0].name == field[r][1].name == field[r][2].name:
+            return field[r][0].name
+        if field[0][r].name != 'default' and field[0][r].name == field[1][r].name == field[2][r].name:
+            return field[0][r].name
     if field[0][0].name != 'default' and field[0][0].name == field[1][1].name == field[2][2].name:
         return field[0][0].name
     if field[2][0].name != 'default' and field[2][0].name == field[1][1].name == field[0][2].name:
         return field[2][0].name
-    for i in range(3):
-        for j in range(3):
-            if field[i][j].name == 'default':
+    for r in range(3):
+        for c in range(3):
+            if field[r][c].name == 'default':
                 return False
     return 'Draw'
 
 
 play = True
-player = 0
+player = 'left'
 for i in range(3):
     for j in range(3):
         field[i][j].name = 'default'
@@ -177,27 +176,25 @@ while game and play:
     for e in event.get():
         if e.type == QUIT:
             game = False
-        if e.type == MOUSEBUTTONDOWN and e.button == 1:
+        if e.type == MOUSEBUTTONDOWN:
             files['click'].play()
             x, y = e.pos
             for i in range(3):
                 for j in range(3):
                     if field[i][j].rect.collidepoint(x, y) and field[i][j].name == 'default':
-                        if player == 0:
+                        if player == 'left':
                             field[i][j].name = players[0]
-                            player = 1
+                            player = 'right'
                         else:
                             field[i][j].name = players[1]
-                            player = 0
+                            player = 'left'
             draw_field()
             c = check_win()
             if c == 'Draw':
                 w.fill(white)
                 lp, rp = sprites[players[0]], sprites[players[1]]
-                w.blit(transform.scale(files[players[0]], (lp.image.get_width() * 2, lp.image.get_height() * 2)),
-                       (lp.sx, lp.sy + 130))
-                w.blit(transform.scale(files[players[1]], (rp.image.get_width() * 2, rp.image.get_height() * 2)),
-                       (rp.sx + 300, rp.sy + 130))
+                w.blit(transform.scale(files[players[0]], (lp.image.get_width() * 2, lp.image.get_height() * 2)), (lp.sx, lp.sy + 130))
+                w.blit(transform.scale(files[players[1]], (rp.image.get_width() * 2, rp.image.get_height() * 2)), (rp.sx + 300, rp.sy + 130))
                 w.blit(f.render('Draw!', True, black), (270, 50))
                 files['draw'].play()
             elif c:
@@ -208,9 +205,8 @@ while game and play:
                     sx_add = 160
                 elif c == 'Fubuki':
                     sx_add = 150
-                w.blit(transform.scale(files[c], (i.get_width() * 2, i.get_height() * 2)),
-                       (sprites[c].sx + sx_add, sprites[c].sy + 130))
+                w.blit(transform.scale(files[c], (i.get_width() * 2, i.get_height() * 2)), (sprites[c].sx + sx_add, sprites[c].sy + 130))
                 w.blit(f.render('Here\'s our winner!', True, sprites[c].color), (180, 50))
                 files['victory'].play()
-        clock.tick(60)
-        display.update()
+    clock.tick(60)
+    display.update()
