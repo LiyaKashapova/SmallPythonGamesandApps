@@ -27,7 +27,6 @@ clock = time.Clock()
 images = {
     'back': transform.scale(image.load('back.jpg'), (ww, wh)),
     'gems': [image.load(f'Gems/{i}.png') for i in range(1, 22)],
-    'broken': image.load('Gems/broken.png'),
     'stones': [image.load(f'Stones/{i}.png') for i in range(1, 16)],
     'alien': image.load('alien.png'),
     'plate': image.load('plate.png')
@@ -82,11 +81,9 @@ while run:
         elif e.type == KEYDOWN:
             if play:
                 if e.key == K_a:
-                    if alien.rect.x >= alien.speed:
-                        mr = True
+                    ml = True
                 elif e.key == K_d:
-                    if alien.rect.x <= ww - alien.speed:
-                        ml = True
+                    mr = True
             else:
                 generation = score = die = 0
                 tick = int(timer.time())
@@ -99,16 +96,24 @@ while run:
                 play = True
         elif e.type == KEYUP:
             if e.key == K_a:
-                mr = False
-            elif e.key == K_d:
                 ml = False
+            elif e.key == K_d:
+                mr = False
     if play:
         if mr:
-            alien.rect.x -= alien.speed
-            plate.rect.x -= alien.speed
+            if alien.rect.x >= ww:
+                alien.rect.x = 0
+                plate.rect.x = 25
+            else:
+                alien.rect.x += alien.speed
+                plate.rect.x += alien.speed
         elif ml:
-            alien.rect.x += alien.speed
-            plate.rect.x += alien.speed
+            if alien.rect.x <= 0:
+                alien.rect.x = ww - alien.image.get_width()
+                plate.rect.x = ww - alien.image.get_width() + 25
+            else:
+                alien.rect.x -= alien.speed
+                plate.rect.x -= alien.speed
         cur_time = int(timer.time())
         if cur_time - tick == 1:
             generation += 1
@@ -119,7 +124,8 @@ while run:
             gems.add([GameSprite(choice(images['gems']), randint(50, ww - 50), randint(-300, -50), 50, 50, 0) for i in range(7)])
         elif generation == 5:
             generation = 0
-            stones.add([GameSprite(choice(images['stones']), randint(50, ww - 50), randint(-300, -50), 50, 50, 0) for i in range(3)])
+            stones.add(
+                [GameSprite(choice(images['stones']), randint(50, ww - 50), randint(-300, -50), 50, 50, 0) for i in range(3)])
         for g in gems:
             g.rect.y += randint(1, 5)
             if g.rect.y > wh:
@@ -167,9 +173,9 @@ while run:
             play = False
         else:
             w.blit(f.render(f'Need to be staffed: {50 - score}', True, t_stroke), (20, 20))
-            w.blit(f.render(f'Need to be staffed: {50 - score}', True, t_color), (22, 22))
+            w.blit(f.render(f'Need to be staffed: {50 - score}', True, t_color), (20, 22))
             w.blit(f.render(f'Dying from hunger: {10 - die}', True, t_stroke), (20, 100))
-            w.blit(f.render(f'Dying from hunger: {10 - die}', True, t_color), (22, 102))
+            w.blit(f.render(f'Dying from hunger: {10 - die}', True, t_color), (20, 102))
             alien.draw(w)
             plate.draw(w)
             gems.draw(w)
