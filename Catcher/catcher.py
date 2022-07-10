@@ -70,7 +70,7 @@ alien = GameSprite(images['alien'], ww / 2 - 100, wh - 300, 200, 300, 10)
 plate = GameSprite(images['plate'], ww / 2 - 75, wh - 140, 150, 45, 10)
 gems = sprite.Group()
 stones = sprite.Group()
-tick = int(timer.time())
+start = int(timer.time())
 generation = score = die = 0
 play = True
 mr = ml = False
@@ -86,7 +86,7 @@ while run:
                     mr = True
             else:
                 generation = score = die = 0
-                tick = int(timer.time())
+                start = int(timer.time())
                 end.stop()
                 mixer.music.play(-1)
                 for g in gems:
@@ -115,31 +115,30 @@ while run:
                 alien.rect.x -= alien.speed
                 plate.rect.x -= alien.speed
         cur_time = int(timer.time())
-        if cur_time - tick == 1:
+        if cur_time - start == 1:
             generation += 1
             die += 1
-            tick = cur_time
+            start = cur_time
         if generation == 3:
             generation += 1
             gems.add([GameSprite(choice(images['gems']), randint(50, ww - 50), randint(-300, -50), 50, 50, 0) for i in range(7)])
         elif generation == 5:
             generation = 0
-            stones.add(
-                [GameSprite(choice(images['stones']), randint(50, ww - 50), randint(-300, -50), 50, 50, 0) for i in range(3)])
+            stones.add([GameSprite(choice(images['stones']), randint(50, ww - 50), randint(-300, -50), 50, 50, 0) for i in range(3)])
         for g in gems:
             g.rect.y += randint(1, 5)
             if g.rect.y > wh:
                 gems.remove(g)
         for s in stones:
-            s.rect.y += randint(1, 3)
+            s.rect.y += randint(1, 5)
             if s.rect.y > wh:
                 stones.remove(s)
         if sprite.spritecollide(plate, gems, True):
             gulp.play()
             score += 1
-            if score % 3 == 0:
-                die = 0
+            die = 0
         if sprite.spritecollide(plate, stones, True):
+            gulp.play()
             score = 0
             die += 3
         w.blit(images['back'], (0, 0))
@@ -158,8 +157,8 @@ while run:
             timer.sleep(10)
             play = False
         elif 10 - die <= 0:
-            w.blit(f.render(f'Oh, no! Our friend...', True, t_stroke), (ww / 2 - 250, 180))
-            w.blit(f.render(f'Oh, no! Our friend...', True, t_color), (ww / 2 - 250, 182))
+            w.blit(f.render(f'Oh, no! Our friend....', True, t_stroke), (ww / 2 - 250, 180))
+            w.blit(f.render(f'Oh, no! Our friend....', True, t_color), (ww / 2 - 250, 182))
             w.blit(f.render(f'DIED of hunger', True, t_stroke), (ww / 2 - 210, 280))
             w.blit(f.render(f'DIED of hunger', True, t_color), (ww / 2 - 210, 282))
             alien.rect.x = ww / 2 - 100
