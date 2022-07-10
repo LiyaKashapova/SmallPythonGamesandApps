@@ -141,8 +141,9 @@ def draw_field():
     for i in range(3):
         x = 0
         for j in range(3):
-            s = sprites[field[i][j].name]
-            field[i][j] = GameSprite(field[i][j].name, s.image, s.color, x, y, s.rect.width, s.rect.height, s.sx, s.sy)
+            name = field[i][j].name
+            ex = sprites[name]
+            field[i][j] = GameSprite(name, ex.image, ex.color, x, y, ex.rect.width, ex.rect.height, ex.sx, ex.sy)
             field[i][j].draw()
             x += 200
         y += 200
@@ -150,14 +151,14 @@ def draw_field():
 
 def check_win():
     for r in range(3):
-        if field[r][0].name != 'default' and field[r][0].name == field[r][1].name == field[r][2].name:
+        if field[r][0].name == field[r][1].name == field[r][2].name != 'default':
             return field[r][0].name
-        if field[0][r].name != 'default' and field[0][r].name == field[1][r].name == field[2][r].name:
+        if field[0][r].name == field[1][r].name == field[2][r].name != 'default':
             return field[0][r].name
-    if field[0][0].name != 'default' and field[0][0].name == field[1][1].name == field[2][2].name:
+    if field[0][0].name == field[1][1].name == field[2][2].name != 'default':
         return field[0][0].name
-    if field[2][0].name != 'default' and field[2][0].name == field[1][1].name == field[0][2].name:
-        return field[2][0].name
+    if field[0][2].name == field[1][1].name == field[2][0].name != 'default':
+        return field[0][2].name
     for r in range(3):
         for c in range(3):
             if field[r][c].name == 'default':
@@ -166,7 +167,7 @@ def check_win():
 
 
 play = True
-player = 'left'
+player = 0
 for i in range(3):
     for j in range(3):
         field[i][j].name = 'default'
@@ -182,31 +183,31 @@ while game and play:
             for i in range(3):
                 for j in range(3):
                     if field[i][j].rect.collidepoint(x, y) and field[i][j].name == 'default':
-                        if player == 'left':
+                        if player == 0:
                             field[i][j].name = players[0]
-                            player = 'right'
+                            player = 1
                         else:
                             field[i][j].name = players[1]
-                            player = 'left'
+                            player = 0
             draw_field()
-            c = check_win()
-            if c == 'Draw':
+            n = check_win()
+            if n == 'Draw':
                 w.fill(white)
                 lp, rp = sprites[players[0]], sprites[players[1]]
                 w.blit(transform.scale(files[players[0]], (lp.image.get_width() * 2, lp.image.get_height() * 2)), (lp.sx, lp.sy + 130))
                 w.blit(transform.scale(files[players[1]], (rp.image.get_width() * 2, rp.image.get_height() * 2)), (rp.sx + 300, rp.sy + 130))
                 w.blit(f.render('Draw!', True, black), (270, 50))
                 files['draw'].play()
-            elif c:
+            elif n:
                 w.fill(white)
-                i = sprites[c].image
+                s = sprites[n]
                 sx_add = 100
-                if c == 'Saitama':
+                if n == 'Saitama':
                     sx_add = 160
-                elif c == 'Fubuki':
+                elif n == 'Fubuki':
                     sx_add = 150
-                w.blit(transform.scale(files[c], (i.get_width() * 2, i.get_height() * 2)), (sprites[c].sx + sx_add, sprites[c].sy + 130))
-                w.blit(f.render('Here\'s our winner!', True, sprites[c].color), (180, 50))
+                w.blit(transform.scale(files[n], (s.image.get_width() * 2, s.image.get_height() * 2)), (s.sx + sx_add, s.sy + 130))
+                w.blit(f.render('Here\'s our winner!', True, sprites[n].color), (180, 50))
                 files['victory'].play()
     clock.tick(60)
     display.update()
