@@ -2,12 +2,6 @@ from pygame import *
 from random import randint, choice
 import time as timer
 
-def r(relative_path):
-    try:
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
 
 class GameSprite(sprite.Sprite):
     def __init__(self, i, x, y, iw, ih, s):
@@ -26,16 +20,16 @@ ww = 1200
 wh = 700
 w = display.set_mode((ww, wh))
 display.set_caption('Hunger!')
-display.set_icon(transform.scale(image.load(r('icon.png')), (50, 50)))
+display.set_icon(transform.scale(image.load('icon.png'), (50, 50)))
 mouse.set_visible(False)
 clock = time.Clock()
 
 images = {
-    'back': transform.scale(image.load(r('back.jpg')), (ww, wh)),
-    'gems': [image.load(r(f'C:/Users/13/PycharmProjects/Catcher/Gems/{i}.png')) for i in range(1, 22)],
-    'stones': [image.load(r(f'C:/Users/13/PycharmProjects/Catcher/Stones/{i}.png')) for i in range(1, 16)],
-    'alien': image.load(r('alien.png')),
-    'plate': image.load(r('plate.png'))
+    'back': transform.scale(image.load('back.jpg'), (ww, wh)),
+    'gems': [image.load(f'Gems/{i}.png') for i in range(1, 22)],
+    'stones': [image.load(f'Stones/{i}.png') for i in range(1, 16)],
+    'alien': image.load('alien.png'),
+    'plate': image.load('plate.png')
 }
 
 font.init()
@@ -44,11 +38,11 @@ t_stroke = (255, 255, 255)
 t_color = (25, 0, 50)
 
 mixer.init()
-mixer.music.load(r('main.mp3'))
+mixer.music.load('main.mp3')
 mixer.music.set_volume(0.3)
-gulp = mixer.Sound(r('gulp.mp3'))
-sigh = mixer.Sound(r('sigh.mp3'))
-end = mixer.Sound(r('end.mp3'))
+gulp = mixer.Sound('gulp.mp3')
+sigh = mixer.Sound('sigh.mp3')
+end = mixer.Sound('end.mp3')
 
 run = play = True
 mixer.music.play(-1)
