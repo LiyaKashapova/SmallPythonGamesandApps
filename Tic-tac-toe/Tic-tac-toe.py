@@ -57,8 +57,7 @@ field = [[sprites['Saitama'], sprites['Genos'], sprites['Bang']],
          [sprites['default'], sprites['default'], sprites['default']],
          [sprites['Sonic'], sprites['Fubuki'], sprites['Garou']]]
 
-ww = 600
-wh = 600
+ww = wh = 600
 w = display.set_mode((ww, wh))
 display.set_caption('OPM Tic-Tac-Toe')
 display.set_icon(files['icon'])
@@ -142,8 +141,8 @@ def draw_field():
         x = 0
         for j in range(3):
             name = field[i][j].name
-            ex = sprites[name]
-            field[i][j] = GameSprite(name, ex.image, ex.color, x, y, ex.rect.width, ex.rect.height, ex.sx, ex.sy)
+            s = sprites[name]
+            field[i][j] = GameSprite(name, s.image, s.color, x, y, s.rect.width, s.rect.height, s.sx, s.sy)
             field[i][j].draw()
             x += 200
         y += 200
@@ -207,7 +206,7 @@ while game and play:
                 elif n == 'Fubuki':
                     sx_add = 150
                 w.blit(transform.scale(files[n], (s.image.get_width() * 2, s.image.get_height() * 2)), (s.sx + sx_add, s.sy + 130))
-                w.blit(f.render('Here\'s our winner!', True, sprites[n].color), (180, 50))
+                w.blit(f.render('Here\'s our winner!', True, s.color), (180, 50))
                 files['victory'].play()
     clock.tick(60)
     display.update()
