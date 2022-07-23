@@ -1,5 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QLabel, QPushButton, QListWidget, QHBoxLayout, \
-    QVBoxLayout, QStyle
+from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QLabel, QPushButton, QListWidget, QHBoxLayout, QVBoxLayout
 from PyQt5.QtCore import Qt  # Qt.KeepAspectRatio константа для зміни розмірів зі збереженням пропорцій
 from PyQt5.QtGui import QPixmap, QIcon  # картинка оптимізована для відображення на екрані
 from PIL import Image
@@ -8,19 +7,27 @@ import os
 
 
 class ImageProcessor:
-    def __init__(self):
-        self.image = None
-        self.dir = None
-        self.filename = None
-        self.save_dir = "Modified/"
+    image = None
+    dir = None
+    filename = None
+    save_dir = "Modified/"
 
-    def load(self, filename):
-        self.filename = filename
-        fullname = os.path.join(workdir, filename)
-        self.image = Image.open(fullname)
+    def show_files(self):
+        extensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp']
+        self.dir = QFileDialog.getExistingDirectory()
+        filenames = [filename for filename in os.listdir(self.dir) if filename.split('.')[-1] in extensions]
+        files.clear()
+        for filename in filenames:
+            files.addItem(filename)
+
+    def show_image(self):
+        if files.currentRow() > -1:
+            self.filename = files.currentItem().text()
+            self.image = Image.open(os.path.join(self.dir, self.filename))
+            draw_image(os.path.join(self.dir, workimage.filename))
 
     def save(self):
-        path = os.path.join(workdir, self.save_dir)
+        path = os.path.join(self.dir, self.save_dir)
         if not (os.path.exists(path) or os.path.isdir(path)):
             os.mkdir(path)
         fullname = os.path.join(path, self.filename)
@@ -30,74 +37,41 @@ class ImageProcessor:
         if self.image:
             self.image = self.image.convert("L")
             self.save()
-            image_path = os.path.join(workdir, self.save_dir, self.filename)
+            image_path = os.path.join(self.dir, self.save_dir, self.filename)
             draw_image(image_path)
 
     def left(self):
         if self.image:
             self.image = self.image.transpose(Image.Transpose.ROTATE_90)
             self.save()
-            image_path = os.path.join(workdir, self.save_dir, self.filename)
+            image_path = os.path.join(self.dir, self.save_dir, self.filename)
             draw_image(image_path)
 
     def right(self):
         if self.image:
             self.image = self.image.transpose(Image.Transpose.ROTATE_270)
             self.save()
-            image_path = os.path.join(workdir, self.save_dir, self.filename)
+            image_path = os.path.join(self.dir, self.save_dir, self.filename)
             draw_image(image_path)
 
     def flip(self):
         if self.image:
             self.image = self.image.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
             self.save()
-            image_path = os.path.join(workdir, self.save_dir, self.filename)
+            image_path = os.path.join(self.dir, self.save_dir, self.filename)
             draw_image(image_path)
 
     def sharpen(self):
         if self.image:
             self.image = self.image.filter(SHARPEN)
             self.save()
-            image_path = os.path.join(workdir, self.save_dir, self.filename)
+            image_path = os.path.join(self.dir, self.save_dir, self.filename)
             draw_image(image_path)
-
-
-def filter_files(fs, extensions):
-    result = []
-    for filename in fs:
-        for ext in extensions:
-            if filename.endswith(ext):
-                result.append(filename)
-    return result
-
-
-def choose_dir():
-    global workdir
-    workdir = QFileDialog.getExistingDirectory()
-
-
-def show_files():
-    extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp']
-    choose_dir()
-    filenames = filter_files(os.listdir(workdir), extensions)
-    files.clear()
-    for filename in filenames:
-        files.addItem(filename)
-
-
-def show_image():
-    if files.currentRow() >= 0:
-        filename = files.currentItem().text()
-        workimage.load(filename)
-        draw_image(os.path.join(workdir, workimage.filename))
 
 
 def draw_image(path):
     image.hide()
-    pix = QPixmap(path)
-    w, h = image.width(), image.height()
-    pix = pix.scaled(w, h, Qt.KeepAspectRatio)
-    image.setPixmap(pix)
+    image.setPixmap(QPixmap(path).scaled(image.width(), image.height(), Qt.KeepAspectRatio))
     image.show()
 
 
@@ -120,7 +94,7 @@ col1 = QVBoxLayout()
 col2 = QVBoxLayout()
 col1.addWidget(btn_dir)
 col1.addWidget(files)
-col2.addWidget(image, 95)
+col2.addWidget(image, 95, alignment=Qt.AlignHCenter)
 row_tools = QHBoxLayout()
 row_tools.addWidget(btn_left)
 row_tools.addWidget(btn_right)
@@ -128,15 +102,13 @@ row_tools.addWidget(btn_flip)
 row_tools.addWidget(btn_sharp)
 row_tools.addWidget(btn_bw)
 col2.addLayout(row_tools)
-
 row.addLayout(col1, 20)
 row.addLayout(col2, 80)
 w.setLayout(row)
 
-workdir = ''
 workimage = ImageProcessor()
-files.currentRowChanged.connect(show_image)
-btn_dir.clicked.connect(show_files)
+files.currentRowChanged.connect(workimage.show_image)
+btn_dir.clicked.connect(workimage.show_files)
 btn_bw.clicked.connect(workimage.bw)
 btn_left.clicked.connect(workimage.left)
 btn_right.clicked.connect(workimage.right)
