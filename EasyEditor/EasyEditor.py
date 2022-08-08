@@ -1,10 +1,8 @@
 from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QLabel, QPushButton, QListWidget, QHBoxLayout, QVBoxLayout
 from PyQt5.QtCore import Qt  # Qt.KeepAspectRatio константа для зміни розмірів зі збереженням пропорцій
 from PyQt5.QtGui import QPixmap, QIcon  # картинка оптимізована для відображення на екрані
-from PIL import Image
-from PIL.ImageFilter import SHARPEN
+from PIL import Image, ImageFilter
 import os
-
 
 class ImageProcessor:
     image = None
@@ -51,7 +49,7 @@ class ImageProcessor:
 
     def sharpen(self):
         if self.image:
-            self.image = self.image.filter(SHARPEN)
+            self.image = self.image.filter(ImageFilter.SHARPEN)
             self.save()
 
     def bw(self):
@@ -64,7 +62,7 @@ app = QApplication([])
 w = QWidget()
 w.setFixedSize(700, 500)
 w.setWindowTitle('Easy Editor')
-w.setWindowIcon(QIcon('brush.ico'))
+w.setWindowIcon(QIcon('brush.png'))
 btn_dir = QPushButton('Папка')
 files = QListWidget()
 image_label = QLabel()
@@ -96,8 +94,8 @@ btn_dir.clicked.connect(workimage.show_files)
 files.itemClicked.connect(workimage.show_image)
 btn_left.clicked.connect(workimage.left)
 btn_right.clicked.connect(workimage.right)
-btn_sharp.clicked.connect(workimage.sharpen)
 btn_flip.clicked.connect(workimage.flip)
+btn_sharp.clicked.connect(workimage.sharpen)
 btn_bw.clicked.connect(workimage.bw)
 
 w.show()
