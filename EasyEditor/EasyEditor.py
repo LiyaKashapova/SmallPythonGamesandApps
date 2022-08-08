@@ -4,6 +4,7 @@ from PyQt5.QtGui import QPixmap, QIcon  # картинка оптимізова�
 from PIL import Image, ImageFilter
 import os
 
+
 class ImageProcessor:
     image = None
     dir = None
