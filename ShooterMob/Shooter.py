@@ -1,15 +1,6 @@
 from random import randint
 from pygame import *
 from time import time as timer
-import os
-
-
-def resource_path(relative_path):
-    try:
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
 
 
 class GameSprite(sprite.Sprite):
@@ -34,7 +25,7 @@ class Player(GameSprite):
             self.rect.x += self.speed
 
     def fire(self):
-        bullet = Bullet(resource_path('lasers.png'), self.rect.centerx, self.rect.top, 30, 40, -15)
+        bullet = Bullet('lasers.png', self.rect.centerx, self.rect.top, 30, 40, -15)
         bullets.add(bullet)
 
 
@@ -60,16 +51,16 @@ wh = 700
 
 w = display.set_mode((ww, wh))
 display.set_caption('???')
-display.set_icon(image.load(resource_path('icon.png')))
-back = transform.scale(image.load(resource_path('back.png')), (ww, wh))
+display.set_icon(image.load('icon.png'))
+back = transform.scale(image.load('back.png'), (ww, wh))
 
 mixer.init()
-mixer.music.load(resource_path('Mobs Theme v2.mp3'))
+mixer.music.load('Mobs Theme v2.mp3')
 mixer.music.set_volume(0.1)
 mixer.music.play()
-hit = mixer.Sound(resource_path('hit.mp3'))
+hit = mixer.Sound('hit.mp3')
 hit.set_volume(0.2)
-click = mixer.Sound(resource_path('click.mp3'))
+click = mixer.Sound('click.mp3')
 click.set_volume(0.2)
 
 w.blit(back, (0, 0))
@@ -82,14 +73,14 @@ f = font.SysFont('Impact', 40)
 press = f.render('Press P to run again...', True, (245, 245, 245))
 w.blit(f.render('Don''t let the monsters get through!', True, (154, 38, 99)), (200, 120))
 w.blit(f.render('Each                diminishes your allies''s morale', True, (154, 38, 99)), (150, 200))
-w.blit(transform.scale(image.load(resource_path('sphere.png')), (60, 50)), (250, 200))
+w.blit(transform.scale(image.load('sphere.png'), (60, 50)), (250, 200))
 w.blit(f.render('as well as each monsters going through you', True, (154, 38, 99)), (150, 280))
 w.blit(f.render('Each                gives your allies hope, pick them up!', True, (154, 38, 99)), (120, 360))
-w.blit(transform.scale(image.load(resource_path('blast.png')), (50, 50)), (230, 360))
+w.blit(transform.scale(image.load('blast.png'), (50, 50)), (230, 360))
 button = Rect(400, 490, 210, 110)
 draw.rect(w, (216, 191, 216), button, 5)
-b = image.load(resource_path('button.png'))
-bg = image.load(resource_path('buttongrey.png'))
+b = image.load('button.png')
+bg = image.load('buttongrey.png')
 w.blit(b, (405, 495))
 w.blit(f.render('Play', True, (51, 0, 102)), (470, 520))
 
@@ -120,15 +111,15 @@ while run and game:
 reload = False
 score = lost = fire = 0
 color = (154, 38, 99)
-player = Player(resource_path('Shigeo.png'), ww / 2, wh - 180, 85, 170, 15)
+player = Player('Shigeo.png', ww / 2, wh - 180, 85, 170, 15)
 monsters = sprite.Group()
 for i in range(1, 6):
-    monsters.add(Enemy(resource_path('ghost.png'), randint(80, ww - 200), -40, 200, 100, randint(1, 5)))
+    monsters.add(Enemy('ghost.png', randint(80, ww - 200), -40, 200, 100, randint(1, 5)))
 obs = sprite.Group()
 blasts = sprite.Group()
 for i in range(1, 3):
-    obs.add(Enemy(resource_path('sphere.png'), randint(30, ww - 30), -40, 100, 100, randint(1, 7)))
-    blasts.add(Enemy(resource_path('blast.png'), randint(30, ww - 30), -40, 100, 100, randint(1, 7)))
+    obs.add(Enemy('sphere.png', randint(30, ww - 30), -40, 100, 100, randint(1, 7)))
+    blasts.add(Enemy('blast.png', randint(30, ww - 30), -40, 100, 100, randint(1, 7)))
 bullets = sprite.Group()
 
 game = True
@@ -145,10 +136,10 @@ while run:
                 for o in obs: o.kill()
                 for b in blasts: b.kill()
                 for i in range(1, 6):
-                    monsters.add(Enemy(resource_path('ghost.png'), randint(80, ww - 200), -40, 200, 100, randint(1, 5)))
+                    monsters.add(Enemy('ghost.png', randint(80, ww - 200), -40, 200, 100, randint(1, 5)))
                 for i in range(1, 3):
-                    obs.add(Enemy(resource_path('sphere.png'), randint(30, ww - 30), -40, 100, 100, randint(1, 7)))
-                    blasts.add(Enemy(resource_path('blast.png'), randint(30, ww - 30), -40, 100, 100, randint(1, 7)))
+                    obs.add(Enemy('sphere.png', randint(30, ww - 30), -40, 100, 100, randint(1, 7)))
+                    blasts.add(Enemy('blast.png', randint(30, ww - 30), -40, 100, 100, randint(1, 7)))
             if e.key == K_SPACE:
                 if fire < 10 and not reload:
                     fire += 1
@@ -169,7 +160,7 @@ while run:
         collides = sprite.groupcollide(monsters, bullets, True, True)
         for c in collides:
             score += 1
-            monsters.add(Enemy(resource_path('ghost.png'), randint(80, ww - 200), -100, 200, 100, randint(1, 5)))
+            monsters.add(Enemy('ghost.png', randint(80, ww - 200), -100, 200, 100, randint(1, 5)))
         for m in monsters:
             if m.rect.y > ww:
                 lost -= 1
@@ -177,7 +168,7 @@ while run:
                 m.rect.y = -100
         if sprite.spritecollide(player, blasts, True):
             lost -= 1
-            blasts.add(Enemy(resource_path('blast.png'), randint(80, ww - 200), -40, 100, 100, randint(1, 5)))
+            blasts.add(Enemy('blast.png', randint(80, ww - 200), -40, 100, 100, randint(1, 5)))
         if sprite.spritecollide(player, obs, True):
             lost += 1
         if 3 > lost:
