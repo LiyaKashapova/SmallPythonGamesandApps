@@ -30,8 +30,7 @@ class Player(GameSprite):
             self.rect.y += self.speed
 
 
-ww = 600
-wh = 500
+ww, wh = 600, 500
 back = transform.scale(image.load('back.png'), (ww, wh))
 w = display.set_mode((ww, wh))
 display.set_caption('Catch Falafel')
