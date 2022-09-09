@@ -23,6 +23,7 @@ class Player(GameSprite):
             self.rect.x -= self.speed
         if keys[K_d] and self.rect.x < ww - 80:
             self.rect.x += self.speed
+        self.draw()
 
     def fire(self):
         bullet = Bullet('lasers.png', self.rect.centerx, self.rect.top, 30, 40, 15)
@@ -37,11 +38,13 @@ class Enemy(GameSprite):
             self.rect.x = randint(80, ww - 80)
             self.rect.y = 0
             missed += 1
+        self.draw()
 
 
 class Bullet(GameSprite):
     def update(self):
         self.rect.y -= self.speed
+        self.draw()
         if self.rect.y < 0:
             self.kill()
 
@@ -56,7 +59,7 @@ back = transform.scale(image.load('back.png'), (ww, wh))
 mixer.init()
 mixer.music.load('Mobs Theme v2.mp3')
 mixer.music.set_volume(0.1)
-mixer.music.play()
+mixer.music.play(-1)
 hit = mixer.Sound('hit.mp3')
 hit.set_volume(0.2)
 click = mixer.Sound('click.mp3')
@@ -69,13 +72,13 @@ lose = f.render('YOU LOST!', True, (154, 38, 99))
 f = font.SysFont('Impact', 40)
 
 w.blit(back, (0, 0))
-press = f.render('Press P to run again...', True, (245, 245, 245))
 w.blit(f.render('Don''t let the monsters get through!', True, (154, 38, 99)), (200, 120))
 w.blit(f.render('Each                diminishes your allies''s morale', True, (154, 38, 99)), (150, 200))
 w.blit(transform.scale(image.load('sphere.png'), (60, 50)), (250, 200))
 w.blit(f.render('as well as each monsters going through you', True, (154, 38, 99)), (150, 280))
 w.blit(f.render('Each                gives your allies hope, pick them up!', True, (154, 38, 99)), (120, 360))
 w.blit(transform.scale(image.load('blast.png'), (50, 50)), (230, 360))
+
 button = Rect(400, 490, 210, 110)
 draw.rect(w, (216, 191, 216), button, 5)
 b, bg = image.load('button.png'), image.load('buttongrey.png')
@@ -84,7 +87,6 @@ w.blit(f.render('Play', True, (51, 0, 102)), (470, 520))
 
 
 def button_click():
-    global game
     click.play()
     w.blit(bg, (405, 495))
     w.blit(f.render('Play', True, (51, 0, 102)), (470, 520))
@@ -93,6 +95,7 @@ def button_click():
     w.blit(b, (405, 495))
     w.blit(f.render('Play', True, (51, 0, 102)), (470, 520))
     display.update()
+    global game
     game = False
 
 
@@ -101,19 +104,21 @@ while run and game:
     for e in event.get():
         if e.type == QUIT:
             run = False
-        if e.type == MOUSEBUTTONDOWN and e.button == 1:
-            x, y = e.pos
-            if button.collidepoint(x, y):
+        if e.type == MOUSEBUTTONDOWN:
+            if button.collidepoint(e.pos):
                 button_click()
         display.update()
 
-reload = False
-score = missed = fired = 0
-color = (154, 38, 99)
 player = Player('Shigeo.png', ww / 2, wh - 180, 85, 170, 15)
 monsters = sprite.Group()
 for i in range(1, 6):
     monsters.add(Enemy('ghost.png', randint(80, ww - 200), -40, 200, 100, randint(1, 5)))
+spheres = sprite.Group()
+blasts = sprite.Group()
+for i in range(1, 3):
+    spheres.add(Enemy('sphere.png', randint(30, ww - 30), -40, 100, 100, randint(1, 7)))
+    blasts.add(Enemy('blast.png', randint(30, ww - 30), -40, 100, 100, randint(1, 7)))
+bullets = sprite.Group()
 obs = sprite.Group()
 blasts = sprite.Group()
 for i in range(1, 3):
@@ -121,7 +126,11 @@ for i in range(1, 3):
     blasts.add(Enemy('blast.png', randint(30, ww - 30), -40, 100, 100, randint(1, 7)))
 bullets = sprite.Group()
 
+score = missed = fired = 0
 game = True
+reload = False
+color = (154, 38, 99)
+press = f.render('Press P to run again...', True, (245, 245, 245))
 while run:
     for e in event.get():
         if e.type == QUIT:
@@ -179,19 +188,14 @@ while run:
             color = (255, 204, 204)
         player.update()
         monsters.update()
-        obs.update()
+        spheres.update()
         blasts.update()
         bullets.update()
-        player.draw()
-        monsters.draw(w)
-        obs.draw(w)
-        blasts.draw(w)
-        bullets.draw(w)
         w.blit(f.render('Monsters: ' + str(50 - score), True, (154, 38, 99)), (20, 20))
         if missed > 10:
-            w.blit(f.render('Morale: 0', True, color), (20, 100))
+            w.blit(f.render('Morale: 0', True, (154, 38, 99)), (20, 100))
         else:
-            w.blit(f.render('Morale: ' + str(10 - missed), True, color), (20, 100))
+            w.blit(f.render('Morale: ' + str(10 - missed), True, (154, 38, 99)), (20, 100))
         if missed > 9:
             game = False
             w.blit(lose, (350, 300))
@@ -201,5 +205,3 @@ while run:
             w.blit(win, (350, 300))
             w.blit(press, (320, 500))
         display.update()
-
-
