@@ -113,17 +113,11 @@ player = Player('Shigeo.png', ww / 2, wh - 180, 85, 170, 15)
 monsters = sprite.Group()
 for i in range(1, 6):
     monsters.add(Enemy('ghost.png', randint(80, ww - 200), -40, 200, 100, randint(1, 5)))
-spheres = sprite.Group()
-blasts = sprite.Group()
+bads = sprite.Group()
+goods = sprite.Group()
 for i in range(1, 3):
-    spheres.add(Enemy('sphere.png', randint(30, ww - 30), -40, 100, 100, randint(1, 7)))
-    blasts.add(Enemy('blast.png', randint(30, ww - 30), -40, 100, 100, randint(1, 7)))
-bullets = sprite.Group()
-obs = sprite.Group()
-blasts = sprite.Group()
-for i in range(1, 3):
-    obs.add(Enemy('sphere.png', randint(30, ww - 30), -40, 100, 100, randint(1, 7)))
-    blasts.add(Enemy('blast.png', randint(30, ww - 30), -40, 100, 100, randint(1, 7)))
+    bads.add(Enemy('sphere.png', randint(30, ww - 30), -40, 100, 100, randint(1, 7)))
+    goods.add(Enemy('blast.png', randint(30, ww - 30), -40, 100, 100, randint(1, 7)))
 bullets = sprite.Group()
 
 score = missed = fired = 0
@@ -141,13 +135,13 @@ while run:
                 score = missed = fired = 0
                 for b in bullets: b.kill()
                 for m in monsters: m.kill()
-                for o in obs: o.kill()
-                for b in blasts: b.kill()
+                for b in bads: b.kill()
+                for g in goods: g.kill()
                 for i in range(1, 6):
                     monsters.add(Enemy('ghost.png', randint(80, ww - 200), -40, 200, 100, randint(1, 5)))
                 for i in range(1, 3):
-                    obs.add(Enemy('sphere.png', randint(30, ww - 30), -40, 100, 100, randint(1, 7)))
-                    blasts.add(Enemy('blast.png', randint(30, ww - 30), -40, 100, 100, randint(1, 7)))
+                    bads.add(Enemy('sphere.png', randint(30, ww - 30), -40, 100, 100, randint(1, 7)))
+                    goods.add(Enemy('blast.png', randint(30, ww - 30), -40, 100, 100, randint(1, 7)))
             if e.key == K_SPACE:
                 if not reload:
                     if fired < 9:
@@ -172,30 +166,31 @@ while run:
             monsters.add(Enemy('ghost.png', randint(80, ww - 200), -100, 200, 100, randint(1, 5)))
         for m in monsters:
             if m.rect.y > ww:
-                missed -= 1
+                missed += 1
                 m.rect.x = randint(80, ww - 200)
                 m.rect.y = -100
-        if sprite.spritecollide(player, blasts, True):
-            missed -= 1
-            blasts.add(Enemy('blast.png', randint(80, ww - 200), -40, 100, 100, randint(1, 5)))
-        if sprite.spritecollide(player, obs, True):
+        if sprite.spritecollide(player, bads, True):
             missed += 1
+            bads.add(Enemy('sphere.png', randint(80, ww - 200), -40, 100, 100, randint(1, 5)))
+        if sprite.spritecollide(player, goods, True):
+            missed -= 1
+            goods.add(Enemy('blast.png', randint(80, ww - 200), -40, 100, 100, randint(1, 3)))
         if missed < 3:
             color = (154, 38, 99)
         elif 3 < missed < 5:
-            color = (216, 191, 216)
+            color = (200, 180, 200)
         else:
             color = (255, 204, 204)
         player.update()
         monsters.update()
-        spheres.update()
-        blasts.update()
+        bads.update()
+        goods.update()
         bullets.update()
         w.blit(f.render('Monsters: ' + str(50 - score), True, (154, 38, 99)), (20, 20))
         if missed > 10:
-            w.blit(f.render('Morale: 0', True, (154, 38, 99)), (20, 100))
+            w.blit(f.render('Morale: 0', True, color), (20, 100))
         else:
-            w.blit(f.render('Morale: ' + str(10 - missed), True, (154, 38, 99)), (20, 100))
+            w.blit(f.render('Morale: ' + str(10 - missed), True, color), (20, 100))
         if missed > 9:
             game = False
             w.blit(lose, (350, 300))
