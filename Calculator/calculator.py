@@ -2,27 +2,17 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QLabel, QHBoxLayout, QVBoxLayout
 from PyQt5.QtGui import QFont, QIcon
 from pygame import *
-import os
-
-def resource_path(relative_path):
-    try:
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
-
 
 app = QApplication([])
 s = QWidget()
 s.resize(370, 600)
 s.setWindowTitle('Calculator')
-s.setWindowIcon(QIcon(resource_path('calculator.png')))
+s.setWindowIcon(QIcon('calculator.png'))
 s.show()
 main = QVBoxLayout()
-mainh = QHBoxLayout()
 
 mixer.init()
-hit = mixer.Sound(resource_path('click.mp3'))
+hit = mixer.Sound('click.mp3')
 hit.set_volume(0.4)
 
 enter = QLabel('')
@@ -77,7 +67,6 @@ main.addLayout(hl2)
 main.addLayout(hl3)
 main.addLayout(hl4)
 main.addLayout(hl5)
-main.addLayout(mainh)
 s.setLayout(main)
 
 symbols = ['+', '-', '*', '/', '.']
@@ -106,8 +95,8 @@ def check():
         # Якщо число перед дужкою
             if exp[i] not in symbols and exp[i + 1] == '(':
                 return False
-        # Якщо після числа стоїть знак, крім -
-            if exp[i].isdigit() and exp[i + 1] in symbols and exp[i + 1] != '-':
+        # Якщо після символа стоїть знак, крім -
+            if not exp[i].isdigit() and exp[i + 1] in symbols and exp[i + 1] != '-':
                 return False
         # Коли / 0
             if exp[i] == '/' and exp[i + 1] == '0':
@@ -119,17 +108,17 @@ def addsymb(button):
     hit.play()
     e = enter.text()
     b = button.text()
+    if b == 'AC':
+        enter.setText(e[:-1])
+        return
     if len(e) < 25:
         if b == '=':
             if check():
                 result.setText(str(eval(enter.text())))
             else:
-                result.setText('Error')  # Not A Number - Не Число
+                result.setText('Error')
             return
-        if b == 'AC':
-            enter.setText(e[:-1])  # [1, 2, 3]
-            return
-        enter.setText(e+b)
+    enter.setText(e + b)
 
 
 for k in b.keys():
