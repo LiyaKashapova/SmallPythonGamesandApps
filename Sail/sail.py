@@ -61,11 +61,10 @@ class Fish(GameSprite):
         self.rect.x += self.speed
         if i == 'left' and self.rect.x > s.get_width():
             self.kill()
-            f.add(Fish(choice(images['fish']), randint(-30, -10), randint(10, ww - 10), uniform(-3, -1)))
-        elif self.rect.x < 0:
+            f.add(Fish(choice(images['fish']), randint(-30, -10), randint(50, wh - 300), uniform(1, 3)))
+        elif i == 'right' and self.rect.x < 0:
             self.kill()
-            f.add(Fish(transform.flip(choice(images['fish']), True, False), randint(ww + 10, ww + 30),
-                       randint(10, ww - 10), uniform(-3, -1)))
+            f.add(Fish(transform.flip(choice(images['fish']), True, False), randint(ww + 10, ww + 30), randint(50, wh - 300), uniform(-3, -1)))
         else:
             self.draw(s)
 
@@ -105,9 +104,9 @@ blup.set_volume(0.6)
 player = Octopus(images['octo'], ww / 2, wh / 2, 3)
 obs, fish_left, fish_right = sprite.Group(), sprite.Group(), sprite.Group()
 for i in range(1, 5): obs.add(Obs(choice(images['obs']), randint(10, ww - 10), randint(-30, -10), uniform(1, 3)))
-for i in range(1, 8):
-    fish_left.add(Fish(choice(images['fish']), randint(-30, -10), randint(200, ww - 200), uniform(-3, -1)))
-    fish_right.add(Fish(transform.flip(choice(images['fish']), True, False), randint(ww + 10, ww + 30), randint(200, ww - 200), uniform(-3, -1)))
+for i in range(1, 3):
+    fish_left.add(Fish(choice(images['fish']), randint(-30, -10), randint(50, wh - 300), uniform(1, 3)))
+    fish_right.add(Fish(transform.flip(choice(images['fish']), True, False), randint(ww + 10, ww + 30), randint(50, wh - 300), uniform(-3, -1)))
 
 run = play = True
 move = False
@@ -125,8 +124,8 @@ while run:
                 for r in fish_right: r.kill()
                 for i in range(1, 5): obs.add(Obs(choice(images['obs']), randint(10, ww - 10), randint(-30, -10), uniform(1, 3)))
                 for i in range(1, 8):
-                    fish_left.add(Fish(choice(images['fish']), randint(-30, -10), randint(200, ww - 200), uniform(-3, -1)))
-                    fish_right.add(Fish(transform.flip(choice(images['fish']), True, False), randint(ww + 10, ww + 30), randint(200, ww - 200), uniform(-3, -1)))
+                    fish_left.add(Fish(choice(images['fish']), randint(-30, -10), randint(50, wh - 300), uniform(1, 3)))
+                    fish_right.add(Fish(transform.flip(choice(images['fish']), True, False), randint(ww + 10, ww + 30), randint(50, wh - 300), uniform(-3, -1)))
     if play:
         if move: player.update(w)
         w.blit(images['back'], (0, 0))
@@ -137,11 +136,11 @@ while run:
         if sprite.spritecollide(player, fish_left, True):
             caught.play()
             catch -= 1
-            fish_left.add(Fish(choice(images['fish']), randint(-30, -10), randint(200, ww - 200), uniform(-3, -1)))
+            fish_left.add(Fish(choice(images['fish']), randint(-30, -10), randint(50, wh - 300), uniform(1, 3)))
         elif sprite.spritecollide(player, fish_right, True):
             caught.play()
             catch -= 1
-            fish_right.add(Fish(transform.flip(choice(images['fish']), True, False), randint(ww + 10, ww + 30), randint(200, ww - 200), uniform(-3, -1)))
+            fish_right.add(Fish(transform.flip(choice(images['fish']), True, False), randint(ww + 10, ww + 30), randint(50, wh - 300), uniform(-3, -1)))
         if sprite.spritecollide(player, obs, True):
             hit.play()
             lives -= 1
