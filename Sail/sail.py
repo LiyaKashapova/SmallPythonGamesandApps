@@ -17,18 +17,18 @@ class GameSprite(sprite.Sprite):
         s.blit(self.image, (self.rect.x, self.rect.y))
 
 
-class Octopus(GameSprite):
+class Player(GameSprite):
     trail = []
     start = None
 
     def draw(self, s):
         x, y = mouse.get_pos()
-        angle = m.degrees(m.atan2(-(y - self.rect.centery), x - self.rect.centerx)) - 90  # 90 - if sprite 'looks up'
-        rot_oct = transform.rotate(self.image, angle)
+        angle = m.degrees(m.atan2(-(y - self.rect.centery), x - self.rect.centerx)) - 90
+        rot_player = transform.rotate(self.image, angle)
         for t in self.trail:
             if timer.time() - t.start > 1: self.trail.remove(t)
             else: s.blit(t.image, (t.rect.x, t.rect.y))
-        s.blit(rot_oct, rot_oct.get_rect(center=self.rect.center))
+        s.blit(rot_player, rot_player.get_rect(center=self.rect.center))
 
     def update(self, s):
         x, y = mouse.get_pos()
@@ -90,8 +90,8 @@ images = {
 stroke, text = (10, 10, 10), (120, 0, 150)
 font.init()
 f = font.SysFont('Century', 50, bold=True)
-win = [f.render('Good job! You made it)', True, stroke), f.render('Good job! You made it)', True, text)]
-lose = [f.render('You have to be more careful!', True, stroke), f.render('You have to be more careful!', True, text)]
+win = [f.render('Good job! You made It)', True, stroke), f.render('Good job! You made It)', True, text)]
+lose = [f.render('You have to be more carefull!', True, stroke), f.render('You have to be more carefull!', True, text)]
 press = [f.render('Press P to play again...', True, stroke), f.render('Press P to play again...', True, text)]
 
 mixer.init()
@@ -101,9 +101,9 @@ mixer.music.play(-1)
 hit, blup, caught = mixer.Sound('hit.mp3'), mixer.Sound('bubbles.mp3'), mixer.Sound('catch.mp3')
 blup.set_volume(0.6)
 
-player = Octopus(images['octo'], ww / 2, wh / 2, 3)
+player = Player(images['octo'], ww / 2, wh / 2, 3)
 obs, fish_left, fish_right = sprite.Group(), sprite.Group(), sprite.Group()
-for i in range(1, 5): obs.add(Obs(choice(images['obs']), randint(10, ww - 10), randint(-30, -10), uniform(1, 3)))
+for i in range(1, 5): obs.add(Obs(choice(images['obs']), randint(10, ww - 10), -10, uniform(1, 3)))
 for i in range(1, 3):
     fish_left.add(Fish(choice(images['fish']), randint(-30, -10), randint(50, wh - 300), uniform(1, 3)))
     fish_right.add(Fish(transform.flip(choice(images['fish']), True, False), randint(ww + 10, ww + 30), randint(50, wh - 300), uniform(-3, -1)))
@@ -119,11 +119,13 @@ while run:
         elif e.type == KEYDOWN:
             if not play and e.key == K_p:
                 play, move, lives, catch = True, False, 3, 50
+                player.rect.x = w.get_width() / 2
+                player.rect.y = w.get_height() / 2
                 for o in obs: o.kill()
                 for l in fish_left: l.kill()
                 for r in fish_right: r.kill()
-                for i in range(1, 5): obs.add(Obs(choice(images['obs']), randint(10, ww - 10), randint(-30, -10), uniform(1, 3)))
-                for i in range(1, 8):
+                for i in range(1, 5): obs.add(Obs(choice(images['obs']), randint(10, ww - 10), -10, uniform(1, 3)))
+                for i in range(1, 3):
                     fish_left.add(Fish(choice(images['fish']), randint(-30, -10), randint(50, wh - 300), uniform(1, 3)))
                     fish_right.add(Fish(transform.flip(choice(images['fish']), True, False), randint(ww + 10, ww + 30), randint(50, wh - 300), uniform(-3, -1)))
     if play:
@@ -141,14 +143,14 @@ while run:
             caught.play()
             catch -= 1
             fish_right.add(Fish(transform.flip(choice(images['fish']), True, False), randint(ww + 10, ww + 30), randint(50, wh - 300), uniform(-3, -1)))
-        if sprite.spritecollide(player, obs, True):
+        elif sprite.spritecollide(player, obs, True):
             hit.play()
             lives -= 1
-            obs.add(Obs(choice(images['obs']), randint(10, ww - 10), randint(-30, -10), uniform(1, 3)))
-        for i in range(0, lives): w.blit(images['heart'], (20 + (images['heart'].get_width() + 10) * i, 20))
+            obs.add(Obs(choice(images['obs']), randint(10, ww - 10), -10, uniform(1, 3)))
+        for i in range(0, lives): w.blit(images['heart'], (20 + (10 + images['heart'].get_width()) * i, 20))
         w.blit(images['silhouette'], (20, 80))
-        w.blit(f.render(f': {catch}', True, (10, 10, 10)), (27 + images['silhouette'].get_width(), 75))
-        w.blit(f.render(f': {catch}', True, (120, 0, 150)), (30 + images['silhouette'].get_width(), 75))
+        w.blit(f.render(f': {catch}', True, text), (27 + images['silhouette'].get_width(), 75))
+        w.blit(f.render(f': {catch}', True, stroke), (30 + images['silhouette'].get_width(), 75))
         if lives < 1:
             play = False
             w.blit(lose[0], (245, 300))
@@ -161,5 +163,5 @@ while run:
             w.blit(win[1], (320, 300))
             w.blit(press[0], (315, 500))
             w.blit(press[1], (320, 500))
-        display.update()
-        clock.tick(60)
+    display.update()
+    clock.tick(60)
