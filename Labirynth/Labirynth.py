@@ -79,13 +79,11 @@ walls = [Wall(100, 20, 450, 10), Wall(100, 480, 350, 10), Wall(100, 20, 10, 380)
          Wall(450, 130, 10, 360), Wall(300, 20, 10, 350), Wall(390, 120, 130, 10)]
 font.init()
 f = font.SysFont('Impact', 70)
-won = f.render('You WON!', True, (255, 215, 0))
-lost = f.render('You LOST!', True, (180, 0, 0))
+won, lost = f.render('You WON!', True, (255, 215, 0)), f.render('You LOST!', True, (180, 0, 0))
 mixer.init()
 mixer.music.load('jungles.mp3')
 mixer.music.play()
-yummy = mixer.Sound('drink.mp3')
-kick = mixer.Sound('kick.ogg')
+yummy, kick = mixer.Sound('drink.mp3'), mixer.Sound('kick.ogg')
 
 run = play = True
 while run:
