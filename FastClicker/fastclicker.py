@@ -30,7 +30,7 @@ init()
 font.init()
 w = display.set_mode((500, 300))
 display.set_caption('Fast Clicker')
-display.set_icon(transform.scale(image.load(path('ico.jpg')), (50, 50)))
+display.set_icon(transform.scale(image.load('ico.jpg'), (50, 50)))
 w.fill((190, 255, 0))
 clock = time.Clock()
 
