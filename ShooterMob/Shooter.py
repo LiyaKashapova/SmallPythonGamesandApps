@@ -146,7 +146,6 @@ score = missed = fired = 0
 game, reload, ctime, rtime = True, False, None, None
 wait_s, wait = f.render('Wait, getting angry...', True, stroke), f.render('Wait, getting angry...', True, color)
 press_s, press = f.render('Press P to run again...', True, color), f.render('Press P to run again...', True, stroke)
-tcolor = color
 while run:
     for e in event.get():
         if e.type == QUIT:
@@ -170,6 +169,7 @@ while run:
         if reload:
             ctime = timer()
             if ctime - rtime < 3:
+                w.blit(wait_s, (358, 458))
                 w.blit(wait, (360, 460))
             else:
                 fired = 0
@@ -189,25 +189,11 @@ while run:
         if sprite.spritecollide(player, goods, True):
             missed -= 1
             goods.add(Enemy(images['goods'], randint(80, ww - 200), randint(-60, -40), uniform(1, 3)))
-        if missed < 3:
-            tcolor = color
-        elif 3 < missed < 5:
-            tcolor = (200, 180, 200)
-        else:
-            tcolor = (255, 204, 204)
         player.update()
         monsters.update()
         bads.update()
         goods.update()
         bullets.update()
-        w.blit(f.render(f'Monsters: {50 - score}', True, stroke), (18, 18))
-        w.blit(f.render(f'Monsters: {50 - score}', True, color), (20, 20))
-        if missed > 10:
-            w.blit(f.render('Morale: 0', True, stroke), (18, 98))
-            w.blit(f.render('Morale: 0', True, tcolor), (20, 100))
-        else:
-            w.blit(f.render(f'Morale: {10 - missed}', True, stroke), (18, 98))
-            w.blit(f.render(f'Morale: {10 - missed}', True, tcolor), (20, 100))
         if missed > 9:
             game = False
             w.blit(lose_s, (348, 298))
@@ -220,5 +206,10 @@ while run:
             w.blit(win, (350, 300))
             w.blit(press_s, (318, 498))
             w.blit(press, (320, 500))
+        else:
+            w.blit(f.render(f'Monsters: {50 - score}', True, stroke), (18, 18))
+            w.blit(f.render(f'Monsters: {50 - score}', True, color), (20, 20))
+            w.blit(f.render(f'Morale: {10 - missed}', True, stroke), (18, 98))
+            w.blit(f.render(f'Morale: {10 - missed}', True, color), (20, 100))
         display.update()
         clock.tick(60)
