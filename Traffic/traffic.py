@@ -30,15 +30,15 @@ class Car(GameSprite):
             self.rect.move_ip(self.speed, 0)
 
 
-#  Configuration
-ww = 1200
-wh = 700
-stroke_c = (240, 240, 240)
-back_c = (0, 0, 0)
-text_c = (214, 217, 30)
+ww, wh = 1200, 700
+init()
+clock = time.Clock()
+w = display.set_mode((ww, wh))
+display.set_caption('Traffic')
+display.set_icon(transform.scale(image.load('racing.png'), (50, 50)))
+mouse.set_visible(False)
 
-lives = 3
-
+stroke, back, text = (240, 240, 240), (0, 0, 0), (214, 217, 30)
 font.init()
 f = font.SysFont('Verdana', 30, bold=True)
 mixer.init()
@@ -55,14 +55,7 @@ curb = {
 player = Car('player.png', 5, 50, 100, ww / 2, wh - 100)
 sample = ['car2.png', 'car3.png', 'car4.png']
 
-init()
-clock = time.Clock()
-w = display.set_mode((ww, wh))
-display.set_caption('Traffic')
-display.set_icon(transform.scale(image.load('racing.png'), (50, 50)))
-mouse.set_visible(False)
-
-w.blit(f.render('Press any key to start the game', True, text_c), ((ww / 3) - 50, (wh / 3) + 50))
+w.blit(f.render('Press any key to start the game', True, text), ((ww / 3) - 50, (wh / 3) + 50))
 display.update()
 run = True
 while run:
@@ -104,7 +97,7 @@ def check_hit(cs):
 
 
 cars = sprite.Group()
-score = top_score = cars_add_rate = 0
+score, top_score, add_rate, lives = 0, 0, 0, 3
 save_r_w('read')
 mixer.music.play(-1)
 run = game = True
@@ -118,15 +111,15 @@ while run:
             for c in cars:
                 c.kill()
             mixer.music.play(-1)
-            score = cars_add_rate = 0
+            score, add_rate, lives = 0, 0, 3
     if game:
-        w.fill(back_c)
+        w.fill(back)
         curb['left'].draw()
         curb['right'].draw()
         score += 1
-        cars_add_rate += 1
-        if cars_add_rate == 20:
-            cars_add_rate = 0
+        add_rate += 1
+        if add_rate == 20:
+            add_rate = 0
             cars.add(GameSprite(choice(sample), randint(2, 8), 50, 100, randint(300, 850), -50))
         for c in cars:
             c.rect.move_ip(0, randint(2, 8))
@@ -135,12 +128,12 @@ while run:
         cars.draw(w)
         player.move()
         player.draw()
-        w.blit(f.render('Score: %s' % score, True, back_c), (8, 8))
-        w.blit(f.render('Score: %s' % score, True, text_c), (10, 10))
-        w.blit(f.render('Top Score: %s' % top_score, True, back_c), (8, 58))
-        w.blit(f.render('Top Score: %s' % top_score, True, text_c), (10, 60))
-        w.blit(f.render('Lives: %s' % lives, True, back_c), (8, 108))
-        w.blit(f.render('Lives: %s' % lives, True, text_c), (10, 110))
+        w.blit(f.render('Score: %s' % score, True, back), (8, 8))
+        w.blit(f.render('Score: %s' % score, True, text), (10, 10))
+        w.blit(f.render('Top Score: %s' % top_score, True, back), (8, 58))
+        w.blit(f.render('Top Score: %s' % top_score, True, text), (10, 60))
+        w.blit(f.render('Lives: %s' % lives, True, back), (8, 108))
+        w.blit(f.render('Lives: %s' % lives, True, text), (10, 110))
         clock.tick(40)
         display.update()
         if check_hit(cars):
@@ -157,13 +150,12 @@ while run:
         if lives == 0:
             mixer.music.stop()
             lost.play()
-            w.blit(f.render('Game over', True, back_c), ((ww / 3) + 118, (wh / 3) + 50))
-            w.blit(f.render('Game over', True, text_c), ((ww / 3) + 120, (wh / 3) + 50))
-            w.blit(f.render('Press any key to play again', True, back_c), ((ww / 3) - 32, (wh / 3) + 150))
-            w.blit(f.render('Press any key to play again', True, text_c), ((ww / 3) - 30, (wh / 3) + 150))
+            w.blit(f.render('Game over', True, back), ((ww / 3) + 118, (wh / 3) + 50))
+            w.blit(f.render('Game over', True, text), ((ww / 3) + 120, (wh / 3) + 50))
+            w.blit(f.render('Press any key to play again', True, back), ((ww / 3) - 32, (wh / 3) + 150))
+            w.blit(f.render('Press any key to play again', True, text), ((ww / 3) - 30, (wh / 3) + 150))
             if score > top_score:
                 save_r_w('')
             game = False
-            lives = 3
             display.update()
             timer.sleep(3)
