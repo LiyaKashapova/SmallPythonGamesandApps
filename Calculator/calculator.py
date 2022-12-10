@@ -11,10 +11,6 @@ s.setWindowIcon(QIcon('calculator.png'))
 s.show()
 main = QVBoxLayout()
 
-mixer.init()
-hit = mixer.Sound('click.mp3')
-hit.set_volume(0.4)
-
 enter = QLabel('')
 font = QFont()
 font.setFamily('Arial')
@@ -104,7 +100,12 @@ def check():
     return True
 
 
-def addsymb(button):
+mixer.init()
+hit = mixer.Sound('click.mp3')
+hit.set_volume(0.4)
+
+
+def add_symb(button):
     hit.play()
     e = enter.text()
     b = button.text()
@@ -132,7 +133,7 @@ for k in b.keys():
         b[k].setStyleSheet('background-color: darkgrey')
     else:
         b[k].setStyleSheet('background-color: lightsteelblue')
-    b[k].clicked.connect(lambda checked, button=b[k]: addsymb(button))
+    b[k].clicked.connect(lambda checked, button=b[k]: add_symb(button))
 
 b['0'].setMaximumWidth(155)
 app.setStyle('Fusion')
