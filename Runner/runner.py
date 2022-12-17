@@ -5,7 +5,7 @@ import time as timer
 
 class Runner(sprite.Sprite):
     state = 'idle'  # idle, run, jump, fall, slide, cheer
-    frame = rate = 0
+    r_frame = rate = 0
 
     def __init__(self):
         sprite.Sprite.__init__(self)
@@ -21,13 +21,13 @@ class Runner(sprite.Sprite):
 
     def run(self):
         if self.rate == 5:
-            self.frame += 1
+            self.r_frame += 1
             self.rate = 0
-        if self.frame == 3:
-            self.frame = 0
+        if self.r_frame == 3:
+            self.r_frame = 0
         self.rate += 1
         self.rect.y = wh - self.rect.height - 100
-        self.image = self.i_run[self.frame]
+        self.image = self.i_run[self.r_frame]
 
     def jump(self):
         if self.rect.y < wh - self.rect.height - 400:
@@ -50,12 +50,12 @@ class Runner(sprite.Sprite):
     def cheer(self):
         if self.rate == 7:
             self.rate = 0
-            if self.frame == 0:
-                self.frame = 1
+            if self.r_frame == 0:
+                self.r_frame = 1
             else:
-                self.frame = 0
+                self.r_frame = 0
             self.rect.y = wh - self.rect.height - 100
-            self.image = self.i_cheer[self.frame]
+            self.image = self.i_cheer[self.r_frame]
         self.rate += 1
 
     def update(self):
@@ -104,7 +104,7 @@ class Monster(sprite.Sprite):
 
 
 class Torch(sprite.Sprite):
-    frame = rate = 0
+    cur_frame = rate = 0
 
     def __init__(self, x):
         sprite.Sprite.__init__(self)
@@ -116,11 +116,11 @@ class Torch(sprite.Sprite):
         self.rect.center = (x, 150)
 
     def update(self):
-        self.image = self.frames[self.frame]
-        if self.frame == 6:
-            self.frame = 0
+        self.image = self.frames[self.cur_frame]
+        if self.cur_frame == 6:
+            self.cur_frame = 0
         if self.rate == 2:
-            self.frame += 1
+            self.cur_frame += 1
             self.rate = 0
         self.rate += 1
         if self.rect.x < -50:
@@ -130,8 +130,9 @@ class Torch(sprite.Sprite):
 
 
 init()
-ww, wh = 1200, 800
-w = display.set_mode((ww, wh))
+ww = 1200
+wh = 800
+w = display.set_mode((1200, 800))
 display.set_caption('Run for your life!')
 display.set_icon(transform.scale(image.load('icon.png'), (50, 50)))
 mouse.set_visible(False)
@@ -140,17 +141,24 @@ clock = time.Clock()
 
 font.init()
 f = font.SysFont('Verdana', 50, bold=True, italic=True)
-stroke, color = (255, 255, 255), (0, 115, 0)
-lost = [f.render("You were knocked down!", True, stroke), f.render("You were knocked down!", True, color),
-        f.render("Press any key to try again...", True, stroke), f.render("Press any key to try again...", True, color)]
-won = [f.render("The ghost disappeared!", True, stroke), f.render("The ghost disappeared!", True, color), ]
+t_stroke = (255, 255, 255)
+t_color = (0, 115, 0)
+lost = [f.render("You were knocked down!", True, t_stroke),
+        f.render("You were knocked down!", True, t_color),
+        f.render("Press any key to try again...", True, t_stroke),
+        f.render("Press any key to try again...", True, t_color)]
+won = [f.render("The ghost disappeared!", True, t_stroke),
+       f.render("The ghost disappeared!", True, t_color), ]
 
 mixer.init()
 main_s = mixer.Sound('main.mp3')
 main_s.set_volume(0.15)
 main_s.play(-1)
 running = mixer.Channel(1)
-run_s, jump_s, slide_s, end_s = mixer.Sound('run.mp3'), mixer.Sound('jump.mp3'), mixer.Sound('slide.mp3'), mixer.Sound('end.mp3')
+run_s = mixer.Sound('run.mp3')
+jump_s = mixer.Sound('jump.mp3')
+slide_s = mixer.Sound('slide.mp3')
+end_s = mixer.Sound('end.mp3')
 end_s.set_volume(0.2)
 
 player = Runner()
@@ -166,14 +174,14 @@ while run and play:
             play = False
     w.blit(back, (0, 0))
     torches.draw(w)
-    w.blit(f.render("Don't get hit by the blocks,", True, stroke), (120 - 2, 50 - 2))
-    w.blit(f.render("Don't get hit by the blocks,", True, color), (120, 50))
-    w.blit(f.render("while running from ghost!", True, stroke), (300 - 2, 150 - 2))
-    w.blit(f.render("while running from ghost!", True, color), (300, 150))
-    w.blit(f.render("Press 'w' to jump, press 's' to slide", True, stroke), (120 - 2, 300 - 2))
-    w.blit(f.render("Press 'w' to jump, press 's' to slide", True, color), (120, 300))
-    w.blit(f.render("Press any key to start the game...", True, stroke), (200 - 2, 400 - 2))
-    w.blit(f.render("Press any key to start the game...", True, color), (200, 400))
+    w.blit(f.render("Don't get hit by the blocks,", True, t_stroke), (120 - 2, 50 - 2))
+    w.blit(f.render("Don't get hit by the blocks,", True, t_color), (120, 50))
+    w.blit(f.render("while running from ghost!", True, t_stroke), (300 - 2, 150 - 2))
+    w.blit(f.render("while running from ghost!", True, t_color), (300, 150))
+    w.blit(f.render("Press 'w' to jump, press 's' to slide", True, t_stroke), (120 - 2, 300 - 2))
+    w.blit(f.render("Press 'w' to jump, press 's' to slide", True, t_color), (120, 300))
+    w.blit(f.render("Press any key to start the game...", True, t_stroke), (200 - 2, 400 - 2))
+    w.blit(f.render("Press any key to start the game...", True, t_color), (200, 400))
     player.update()
     display.update()
     clock.tick(60)
