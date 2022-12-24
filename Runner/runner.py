@@ -109,8 +109,7 @@ class Torch(sprite.Sprite):
     def __init__(self, x):
         sprite.Sprite.__init__(self)
         self.frames = []
-        for n in range(1, 8):
-            self.frames.append(transform.scale(image.load('Torch/torch%s.png' % n), (50, 200)))
+        self.frames = [transform.scale(image.load(f'Torch/torch{i}.png'), (50, 200)) for i in range(1, 8)]
         self.image = self.frames[0]
         self.rect = self.image.get_rect()
         self.rect.center = (x, 150)
