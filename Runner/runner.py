@@ -83,7 +83,7 @@ class Obstacle(sprite.Sprite):
         self.image = transform.scale(image.load('boulder.png'), (200, 100))
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = randint(ww + 200, ww + 600), randint(300, 700)
-        self.speed = 25
+        self.speed = randint(20, 25)
 
     def update(self):
         if self.rect.x < -200:
@@ -129,9 +129,8 @@ class Torch(sprite.Sprite):
 
 
 init()
-ww = 1200
-wh = 800
-w = display.set_mode((1200, 800))
+ww, wh = 1200, 800
+w = display.set_mode((ww, wh))
 display.set_caption('Run for your life!')
 display.set_icon(transform.scale(image.load('icon.png'), (50, 50)))
 mouse.set_visible(False)
@@ -140,24 +139,17 @@ clock = time.Clock()
 
 font.init()
 f = font.SysFont('Verdana', 50, bold=True, italic=True)
-t_stroke = (255, 255, 255)
-t_color = (0, 115, 0)
-lost = [f.render("You were knocked down!", True, t_stroke),
-        f.render("You were knocked down!", True, t_color),
-        f.render("Press any key to try again...", True, t_stroke),
-        f.render("Press any key to try again...", True, t_color)]
-won = [f.render("The ghost disappeared!", True, t_stroke),
-       f.render("The ghost disappeared!", True, t_color), ]
+stroke, text = (255, 255, 255), (0, 115, 0)
+lost = [f.render("You were knocked down!", True, stroke), f.render("You were knocked down!", True, text),
+        f.render("Press any key to try again...", True, stroke), f.render("Press any key to try again...", True, text)]
+won = [f.render("The ghost disappeared!", True, stroke), f.render("The ghost disappeared!", True, text), ]
 
 mixer.init()
-main_s = mixer.Sound('main.mp3')
-main_s.set_volume(0.15)
-main_s.play(-1)
+main, run_s, jump_s, slide_s, end_s = mixer.Sound('main.mp3'), mixer.Sound('run.mp3'), mixer.Sound('jump.mp3'),\
+                                      mixer.Sound('slide.mp3'), mixer.Sound('end.mp3')
+main.set_volume(0.15)
+main.play(-1)
 running = mixer.Channel(1)
-run_s = mixer.Sound('run.mp3')
-jump_s = mixer.Sound('jump.mp3')
-slide_s = mixer.Sound('slide.mp3')
-end_s = mixer.Sound('end.mp3')
 end_s.set_volume(0.2)
 
 player = Runner()
@@ -173,14 +165,14 @@ while run and play:
             play = False
     w.blit(back, (0, 0))
     torches.draw(w)
-    w.blit(f.render("Don't get hit by the blocks,", True, t_stroke), (120 - 2, 50 - 2))
-    w.blit(f.render("Don't get hit by the blocks,", True, t_color), (120, 50))
-    w.blit(f.render("while running from ghost!", True, t_stroke), (300 - 2, 150 - 2))
-    w.blit(f.render("while running from ghost!", True, t_color), (300, 150))
-    w.blit(f.render("Press 'w' to jump, press 's' to slide", True, t_stroke), (120 - 2, 300 - 2))
-    w.blit(f.render("Press 'w' to jump, press 's' to slide", True, t_color), (120, 300))
-    w.blit(f.render("Press any key to start the game...", True, t_stroke), (200 - 2, 400 - 2))
-    w.blit(f.render("Press any key to start the game...", True, t_color), (200, 400))
+    w.blit(f.render("Don't get hit by the blocks,", True, stroke), (120 - 2, 50 - 2))
+    w.blit(f.render("Don't get hit by the blocks,", True, text), (120, 50))
+    w.blit(f.render("while running from ghost!", True, stroke), (300 - 2, 150 - 2))
+    w.blit(f.render("while running from ghost!", True, text), (300, 150))
+    w.blit(f.render("Press 'w' to jump, press 's' to slide", True, stroke), (120 - 2, 300 - 2))
+    w.blit(f.render("Press 'w' to jump, press 's' to slide", True, text), (120, 300))
+    w.blit(f.render("Press any key to start the game...", True, stroke), (200 - 2, 400 - 2))
+    w.blit(f.render("Press any key to start the game...", True, text), (200, 400))
     player.update()
     display.update()
     clock.tick(60)
@@ -231,7 +223,7 @@ while run:
             play = False
         if timer.time() - start > 30:
             mixer.music.stop()
-            main_s.stop()
+            main.stop()
             end_s.play()
             while run:
                 for e in event.get():
