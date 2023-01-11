@@ -44,8 +44,7 @@ class GameSprite(sprite.Sprite):
 
 
 class Player(GameSprite):
-    strikes = sprite.Group()
-    holding = False
+    ammunition, strikes = 0, sprite.Group()
 
     def __init__(self, x, y, img, speed, side):
         GameSprite.__init__(self, x, y, img, speed)
@@ -75,12 +74,10 @@ class Player(GameSprite):
 
     def update(self, camera):
         for e in event.get():
-            if e.type == KEYDOWN and e.key == K_SPACE and not self.holding:
-                self.holding = True
+            if e.type == KEYDOWN and e.key == K_SPACE and self.ammunition:
+                self.ammunition -= 1
                 self.strikes.add(Strike(self.rect.centerx, self.rect.centery - 10, images['strike'], 3, self.side))
                 strike_sound.play()
-            elif e.type == KEYUP and e.key == K_SPACE:
-                self.holding = False
         self.strikes.update(camera)
         w.blit(self.image, camera.apply(self))
 
@@ -142,7 +139,7 @@ white = (255, 255, 255)
 
 class Level:
     level = []
-    level_width, level_height, crystal_count, chest_key, obs_key = 0, 0, 0, False, False
+    level_width, level_height, chest_key, obs_key = 0, 0, False, False
     platforms, block_r, block_l, enemies = sprite.Group(), sprite.Group(), sprite.Group(), sprite.Group()
     stairs, crystals, chest_keys, chests, obs = sprite.Group(), sprite.Group(), sprite.Group(), sprite.Group(), sprite.Group()
     portal = sprite.Sprite()
@@ -151,7 +148,8 @@ class Level:
            'e_open': f2.render('Press E to remove the gravitational trap!', True, white),
            'key_chest': f2.render('You need a key to open the chest!', True, white),
            'key_obs': f2.render('You need a key to remove the trap!', True, white),
-           'space': f2.render('Press SPACE to shoot lasers', True, white)
+           'space': f2.render('Press SPACE to shoot lasers', True, white),
+           'no_ammo': f2.render('First collect CRYSTALS to shoot!', True, white)
            }
 
     def __init__(self, player):  # creating main objects based on symbols in 'level' array
@@ -227,7 +225,7 @@ class Level:
         for c in self.crystals:  # drawing crystals
             if sprite.collide_rect(self.player, c):  # collecting crystals
                 crystal_sound.play()
-                self.crystal_count += 1
+                self.player.ammunition += 1
                 c.kill()
             if c:
                 c.update(self.camera)
@@ -242,7 +240,7 @@ class Level:
             if k:
                 k.update(self.camera)
         for c in self.chests:  # drawing chests
-            # opening chests to collect crystals & antigravitons
+            # opening chests to collect antigravitons
             if sprite.collide_rect(self.player, c) and not self.obs_key:
                 if not self.chest_key:
                     w.blit(self.mes['key_chest'], ((ww - self.mes['key_chest'].get_width()) / 2, 50))
@@ -251,9 +249,7 @@ class Level:
                     if keys[K_e]:
                         chest_sound.play()
                         c.image = images['chest_opened']
-                        self.crystal_count += 10
                         self.obs_key, self.chest_key = True, False
-                print('key: ', c, 'amount: ', len(self.chests))
             c.update(self.camera)
         for o in self.obs:  # drawing obs
             if sprite.collide_rect(self.player, o):  # removing obs
@@ -267,7 +263,6 @@ class Level:
                         obs_sound.play()
                         o.kill()
                         self.obs_key = False
-                print('key: ', o, 'amount: ', len(self.obs))
             if o:
                 o.update(self.camera)
         self.portal.update(self.camera)
@@ -275,6 +270,8 @@ class Level:
                 and not sprite.spritecollide(self.player, self.block_r, False) \
                 and not sprite.spritecollide(self.player, self.block_l, False):
             self.player.move_x()
+        if not self.player.ammunition and keys[K_SPACE]:
+            w.blit(self.mes['no_ammo'], ((ww - self.mes['no_ammo'].get_width()) / 2, 50))
         self.player.update(self.camera)
         return flag
 
@@ -285,15 +282,15 @@ class Level1(Level):
         "l                                                                    r",
         "l                                                                    r",
         "l                                                                    r",
-        "l l   °  °     r               l            l   °  °  °     r       r",
+        "l l            r               l            l         °     r        r",
         "l  ------------                  -------      ---------------        r",
         "l l | r                             l | r    l | r       l | r       r",
         "l l   r                             l   r    l   r       l   r       r",
-        "l l    °nr                          l     °  °   r    l      r       r",
+        "l l   ° nr                          l     °      r    l      r       r",
         "l  ------                            ------------      -------       r",
         "l     l | r                                          l | r           r",
         "l     l   r                                          l   r           r",
-        "l     l       °  °  r                         l °  °     r           r",
+        "l     l       °     r                         l    °     r           r",
         "l      -------------                           ---------             r",
         "l               l | r                         l | r                  r",
         "l               l   r                         l   r                  r",
@@ -324,19 +321,19 @@ class Level2(Level):
         "l--------------------------------------------------------------------r",
         "l                                                          l | r     r",
         "l                                                          l   r     r",
-        "l  l     °         °           °            r       l               rr",
+        "l  l     °                     °            r       l            °  rr",
         "l   ----------------------------------------         --------------- r",
-        "l  l | r                              l | r              l | r       r",
-        "l  l   r                              l   r              l   r       r",
-        "l l              r              l   °        °        °       r      r",
+        "l  l | r                              l | r           l | r          r",
+        "l  l   r                              l   r           l   r          r",
+        "l l              r              l            °               r       r",
         "l  --------------                -----------------------------       r",
         "l                                l | r                               r",
         "l                                l   r                               r",
-        "l    l       °       °             °      °                  r       r",
+        "l    l       °                              °                r       r",
         "l     -------------------------------------------------------        r",
         "l                   l | r                                l | r       r",
         "l                   l   r                                l   r       r",
-        "l          °                    °       °            °               r",
+        "l          °                                         °               r",
         "----------------------------------------------------------------------"]
     level_width = len(level[0]) * 40
     level_height = len(level) * 40
@@ -457,7 +454,7 @@ def level_play(restart=True):
         if not level.update():
             return 'loose'
         w.blit(transform.scale(images['crystal'], (50, 50)), (10, 10))  # updating crystals' counter
-        w.blit(f3.render(f': {level.crystal_count}', True, white), (60, 10))
+        w.blit(f3.render(f': {level.player.ammunition}', True, white), (60, 10))
         btn_pause.draw(0, -10)
         if sprite.collide_rect(level.player, level.portal):
             return 'win'
