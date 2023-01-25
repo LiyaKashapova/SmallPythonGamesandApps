@@ -5,7 +5,7 @@ import time as timer
 
 class Runner(sprite.Sprite):
     state = 'idle'  # idle, run, jump, fall, slide, cheer
-    r_frame = rate = 0
+    cur_frame = rate = 0
 
     def __init__(self):
         sprite.Sprite.__init__(self)
@@ -21,13 +21,13 @@ class Runner(sprite.Sprite):
 
     def run(self):
         if self.rate == 5:
-            self.r_frame += 1
+            self.cur_frame += 1
             self.rate = 0
-        if self.r_frame == 3:
-            self.r_frame = 0
+        if self.cur_frame == 3:
+            self.cur_frame = 0
         self.rate += 1
         self.rect.y = wh - self.rect.height - 100
-        self.image = self.i_run[self.r_frame]
+        self.image = self.i_run[self.cur_frame]
 
     def jump(self):
         if self.rect.y < wh - self.rect.height - 400:
@@ -50,12 +50,12 @@ class Runner(sprite.Sprite):
     def cheer(self):
         if self.rate == 7:
             self.rate = 0
-            if self.r_frame == 0:
-                self.r_frame = 1
+            if self.cur_frame == 0:
+                self.cur_frame = 1
             else:
-                self.r_frame = 0
+                self.cur_frame = 0
             self.rect.y = wh - self.rect.height - 100
-            self.image = self.i_cheer[self.r_frame]
+            self.image = self.i_cheer[self.cur_frame]
         self.rate += 1
 
     def update(self):
@@ -99,7 +99,7 @@ class Monster(sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = -50, 100
 
-    def draw(self):
+    def update(self):
         w.blit(self.image, (self.rect.x, self.rect.y))
 
 
@@ -108,7 +108,6 @@ class Torch(sprite.Sprite):
 
     def __init__(self, x):
         sprite.Sprite.__init__(self)
-        self.frames = []
         self.frames = [transform.scale(image.load(f'Torch/torch{i}.png'), (50, 200)) for i in range(1, 8)]
         self.image = self.frames[0]
         self.rect = self.image.get_rect()
@@ -211,7 +210,7 @@ while run:
         w.blit(back, (0, 0))
         torches.update()
         torches.draw(w)
-        ghost.draw()
+        ghost.update()
         obs.update()
         player.update()
         if sprite.spritecollide(player, obs, False):
