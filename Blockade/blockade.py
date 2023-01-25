@@ -437,6 +437,8 @@ def menu():
 def level_play(restart=True):
     global run, cur_level, level
     if restart:
+        if level:
+            level.clear()
         level = Level1() if cur_level == 1 else Level2()
         if music.get_sound() != game_sound:
             music.play(game_sound, -1)
