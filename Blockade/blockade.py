@@ -482,7 +482,7 @@ def level_complete(result):
         game_state = 1
     elif result == 'loose':
         game_state = 2
-        music.play(end_sound, -1)
+        music.play(end_sound)
     teleport_sound.play()
     level.clear()
     headers = [f.render("LEVEL DONE", True, purple, red), f.render("YOU WON", True, purple, red),
