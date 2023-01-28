@@ -3,7 +3,7 @@ from pygame import *
 images = {
     'back': transform.scale(image.load('images/background.png'), (1280, 720)),
     'player': transform.scale(image.load("images/player.png"), (50, 50)),
-    'enemy': transform.scale(image.load("images/robot.png"), (50, 50)),
+    'Strike': transform.scale(image.load("images/robot.png"), (50, 50)),
     'crystal': transform.scale(image.load("images/crystal.png"), (50, 50)),
     'obs': transform.scale(image.load("images/obs.png"), (40, 120)),
     'key': transform.scale(image.load("images/key.png"), (40, 50)),
@@ -83,19 +83,6 @@ class Player(GameSprite):
 
 
 class Strike(GameSprite):
-    def __init__(self, x, y, img, speed, side):
-        GameSprite.__init__(self, x, y, img, speed)
-        self.side = side
-
-    def update(self, camera):
-        if self.side == 'right':
-            self.rect.x += self.speed
-        if self.side == 'left':
-            self.rect.x -= self.speed
-        w.blit(self.image, camera.apply(self))
-
-
-class Enemy(GameSprite):
     def __init__(self, x, y, img, speed, side):
         GameSprite.__init__(self, x, y, img, speed)
         self.side = side
@@ -202,14 +189,14 @@ class Level:
             if sprite.spritecollide(en, self.player.strikes, True):  # destroying enemies that ware struck
                 kick_sound.play()
                 en.kill()
-            if sprite.collide_rect(self.player, en):  # checking if any enemy killed the player
+            if sprite.collide_rect(self.player, en):  # checking if any Strike killed the player
                 flag = False  # indication that the player lost
             if sprite.spritecollide(en, self.block_r, False):  # flip enemies to left if they reached the right side
                 en.side = 'left'
-                en.image = transform.flip(images['enemy'], True, False)
+                en.image = transform.flip(images['Strike'], True, False)
             elif sprite.spritecollide(en, self.block_l, False):  # flip enemies to right if they reached the left side
                 en.side = 'right'
-                en.image = images['enemy']
+                en.image = images['Strike']
             if en:
                 en.update(self.camera)
         for s in self.player.strikes:  # drawing spheres
@@ -300,10 +287,9 @@ class Level1(Level):
     level_height = len(level) * 40
 
     def __init__(self):
-        player = Player(300, 650, images['player'], 10, 'right')
-        super().__init__(player)
-        self.enemies.add(Enemy(400, 480, images['enemy'], 3, 'right'), Enemy(230, 320, images['enemy'], 3, 'right'),
-                         Enemy(1800, 160, images['enemy'], 3, 'right'), Enemy(1700, 320, images['enemy'], 3, 'right'))
+        super().__init__(Player(300, 650, images['player'], 10, 'right'))
+        self.enemies.add(Strike(400, 480, images['Strike'], 3, 'right'), Strike(230, 320, images['Strike'], 3, 'right'),
+                         Strike(1800, 160, images['Strike'], 3, 'right'), Strike(1700, 320, images['Strike'], 3, 'right'))
         self.obs.add(GameSprite(1000, 580, images['obs']), GameSprite(2600, 580, images['obs']))
         self.chest_keys.add(GameSprite(210, 340, images['key']), GameSprite(1600, 340, images['key']))
         self.chests.add(GameSprite(450, 150, images['chest_closed']),
@@ -339,13 +325,12 @@ class Level2(Level):
     level_height = len(level) * 40
 
     def __init__(self):
-        player = Player(300, 810, images['player'], 10, 'right')
-        super().__init__(player)
-        self.enemies.add(Enemy(400, 640, images['enemy'], 3, 'right'), Enemy(230, 320, images['enemy'], 3, 'right'),
-                         Enemy(1800, 160, images['enemy'], 3, 'right'), Enemy(1700, 320, images['enemy'], 3, 'right'),
-                         Enemy(1700, 480, transform.flip(images['enemy'], True, False), 3, 'left'),
-                         Enemy(1700, 640, transform.flip(images['enemy'], True, False), 3, 'left'),
-                         Enemy(230, 480, images['enemy'], 3, 'right'))
+        super().__init__(Player(300, 810, images['player'], 10, 'right'))
+        self.enemies.add(Strike(400, 640, images['Strike'], 3, 'right'), Strike(230, 320, images['Strike'], 3, 'right'),
+                         Strike(1800, 160, images['Strike'], 3, 'right'), Strike(1700, 320, images['Strike'], 3, 'right'),
+                         Strike(1700, 480, transform.flip(images['Strike'], True, False), 3, 'left'),
+                         Strike(1700, 640, transform.flip(images['Strike'], True, False), 3, 'left'),
+                         Strike(230, 480, images['Strike'], 3, 'right'))
         self.obs.add(GameSprite(1700, 410, images['obs']), GameSprite(1000, 100, images['obs']))
         self.chest_keys.add(GameSprite(2350, 500, images['key']), GameSprite(600, 500, images['key']))
         self.chests.add(GameSprite(250, 640, images['chest_closed']))
