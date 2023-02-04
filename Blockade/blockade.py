@@ -239,17 +239,19 @@ class Level:
                         self.obs_key, self.chest_key = True, False
             c.update(self.camera)
         for o in self.obs:  # drawing obs
-            if sprite.collide_rect(self.player, o):  # removing obs
+            if sprite.collide_rect(self.player, o):
                 if not self.obs_key:
                     w.blit(self.mes['key_obs'], ((ww - self.mes['key_obs'].get_width()) / 2, 50))
-                    self.player.rect.x = o.rect.x - 50
                 else:
                     w.blit(self.mes['e_open'], ((ww - self.mes['e_open'].get_width()) / 2, 50))
+                if self.player.side == 'right':
                     self.player.rect.x = o.rect.x - 50
-                    if keys[K_e]:
-                        obs_sound.play()
-                        o.kill()
-                        self.obs_key = False
+                else:
+                    self.player.rect.x = o.rect.right
+                if keys[K_e]:
+                    obs_sound.play()
+                    o.kill()
+                    self.obs_key = False
             if o:
                 o.update(self.camera)
         self.portal.update(self.camera)
@@ -485,8 +487,8 @@ def level_complete(result):
         music.play(end_sound)
     teleport_sound.play()
     level.clear()
-    headers = [f.render("LEVEL DONE", True, purple, red), f.render("YOU WON", True, purple, red),
-               f.render("YOU LOST", True, purple, red)]
+    headers = [f.render(f'LEVEL {cur_level} DONE', True, purple, red), f.render('YOU WON', True, purple, red),
+               f.render('YOU LOST', True, purple, red)]
     elements = []
     if not game_state:
         elements = [Button(xy[1], 'RESTART'), Button(xy[2], 'NEXT LEVEL'), Button(xy[3], 'BACK TO MENU')]
