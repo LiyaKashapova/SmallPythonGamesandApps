@@ -421,8 +421,7 @@ run, cur_level, level = True, 1, None
 clock = time.Clock()
 
 magenta, red, purple = (150, 0, 150), (178, 34, 34), (106, 90, 205)
-game_header, pause_header = f.render("BLOCKADE", True, white, red), f.render("PAUSE", True, white, red)
-xy = [((ww - game_header.get_width()) / 2, 70), (ww / 2, 300), (ww / 2, 450), (ww / 2, 600)]
+xy = [(ww / 2, 300), (ww / 2, 450), (ww / 2, 600)]  # menu buttons' coordinates
 
 
 def level_play(restart=True):
@@ -463,7 +462,8 @@ def level_play(restart=True):
 
 def pause():
     global run
-    elements = [pause_header, Button(xy[1], 'CONTINUE'), Button(xy[2], 'RESTART'), Button(xy[3], 'BACK TO MENU')]
+    elements = [f.render("PAUSE", True, white, red), Button(xy[0], 'CONTINUE'), Button(xy[1], 'RESTART'),
+                Button(xy[2], 'BACK TO MENU')]
     while run:
         for e in event.get():
             if e.type == QUIT:
@@ -480,7 +480,7 @@ def pause():
                     click_sound.play()
                     return 'menu'
         w.blit(images['back'], (0, 0))
-        w.blit(elements[0], ((ww - pause_header.get_width()) / 2, xy[0][1]))
+        w.blit(elements[0], ((ww - elements[0].get_width()) / 2, 70))
         for i in range(1, 4):
             elements[i].draw()
         display.update()
@@ -489,7 +489,8 @@ def pause():
 
 def menu():
     global run
-    elements = [game_header, Button(xy[1], 'START GAME'), Button(xy[2], 'HOW TO PLAY'), Button(xy[3], 'EXIT GAME')]
+    elements = [f.render("BLOCKADE", True, white, red), Button(xy[0], 'START GAME'), Button(xy[1], 'HOW TO PLAY'),
+                Button(xy[2], 'EXIT GAME')]
     if music.get_sound() != menu_sound:
         music.play(menu_sound, -1)
     while run:
@@ -508,7 +509,7 @@ def menu():
                     click_sound.play()
                     run = False
         w.blit(images['back'], (0, 0))
-        w.blit(elements[0], xy[0])
+        w.blit(elements[0], ((ww - elements[0].get_width()) / 2, 70))
         for i in range(1, 4):
             elements[i].draw()
         display.update()
@@ -517,11 +518,12 @@ def menu():
 
 def rules():
     global run
-    elements = [game_header, f3.render('Move with WASD. You can only go up and down the stairs.', True, magenta),
+    elements = [f.render("BLOCKADE", True, white, red),
+                f3.render('Move with WASD. You can only go up and down the stairs.', True, magenta),
                 f3.render('Move with WASD. You can only go up and down the stairs.', True, purple),
                 f3.render('Use SPACE to shoot. Use E to interact with the world.', True, magenta),
                 f3.render('Use SPACE to shoot. Use E to interact with the world.', True, purple),
-                Button(xy[3], 'BACK TO MENU')]
+                Button(xy[2], 'BACK TO MENU')]
     while run:
         for e in event.get():
             if e.type == QUIT:
@@ -532,13 +534,13 @@ def rules():
                     click_sound.play()
                     return 'menu'
         w.blit(images['back'], (0, 0))
-        w.blit(elements[0], xy[0])
-        draw.rect(w, white, Rect((ww - elements[1].get_width()) / 2 - 50, xy[1][1] - 10, elements[1].get_width() + 100,
+        w.blit(elements[0], ((ww - elements[0].get_width()) / 2, 70))
+        draw.rect(w, white, Rect((ww - elements[1].get_width()) / 2 - 50, xy[0][1] - 10, elements[1].get_width() + 100,
                                  (elements[1].get_height() + elements[3].get_height()) + 130))
-        w.blit(elements[1], ((ww - elements[1].get_width()) / 2, xy[1][1]))
-        w.blit(elements[2], ((ww - elements[1].get_width()) / 2 - 3, xy[1][1]))
-        w.blit(elements[3], ((ww - elements[3].get_width()) / 2, xy[2][1]))
-        w.blit(elements[4], ((ww - elements[3].get_width()) / 2 - 3, xy[2][1]))
+        w.blit(elements[1], ((ww - elements[1].get_width()) / 2, xy[0][1]))
+        w.blit(elements[2], ((ww - elements[1].get_width()) / 2 - 3, xy[0][1]))
+        w.blit(elements[3], ((ww - elements[3].get_width()) / 2, xy[1][1]))
+        w.blit(elements[4], ((ww - elements[3].get_width()) / 2 - 3, xy[1][1]))
         elements[5].draw()
         display.update()
         clock.tick(30)
@@ -558,9 +560,9 @@ def level_complete(result):
                f.render('YOU LOST', True, purple, red)]
     elements = []
     if not game_state:
-        elements = [Button(xy[1], 'RESTART'), Button(xy[2], 'NEXT LEVEL'), Button(xy[3], 'BACK TO MENU')]
+        elements = [Button(xy[0], 'RESTART'), Button(xy[1], 'NEXT LEVEL'), Button(xy[2], 'BACK TO MENU')]
     else:
-        elements = [Button(xy[1], 'RESTART'), Button(xy[2], 'HOW TO PLAY'), Button(xy[3], 'BACK TO MENU')]
+        elements = [Button(xy[0], 'RESTART'), Button(xy[1], 'HOW TO PLAY'), Button(xy[2], 'BACK TO MENU')]
     while run:
         for e in event.get():
             if e.type == QUIT:
@@ -582,7 +584,7 @@ def level_complete(result):
                     click_sound.play()
                     return 'menu'
         w.blit(images['back'], (0, 0))
-        w.blit(headers[game_state], ((ww - headers[game_state].get_width()) / 2, xy[0][1]))  # header
+        w.blit(headers[game_state], ((ww - headers[game_state].get_width()) / 2, 70))  # header
         for i in range(0, 3):  # buttons
             elements[i].draw()
         display.update()
