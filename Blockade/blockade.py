@@ -1,4 +1,6 @@
 from pygame import *
+import time as timer
+from random import choice
 
 images = {
     'back': transform.scale(image.load('images/background.png'), (1280, 720)),
@@ -8,6 +10,9 @@ images = {
                          transform.scale(image.load("images/player/climb2.png"), (50, 50))],
                'shoot': transform.scale(image.load("images/player/shoot.png"), (50, 50))},
     'enemy': [transform.scale(image.load(f"images/robot/robot{i}.png"), (50, 50)) for i in range(1, 9)],
+    'boss': [transform.scale(image.load(f"images/boss/walk{i}.png"), (80, 80)) for i in range(1, 9)] +
+            [transform.scale(image.load(f"images/boss/attack{i}.png"), (80, 80)) for i in range(1, 4)],
+    'spheres': [transform.scale(image.load(f"images/boss/sphere{i}.png"), (40, 40)) for i in range(1, 9)],
     'crystal': transform.scale(image.load("images/crystal.png"), (50, 50)),
     'obs': [transform.scale(image.load("images/obs.png"), (40, 120)),
             transform.scale(image.load("images/obs.png"), (20, 60)),
@@ -30,22 +35,24 @@ display.set_icon(transform.scale(image.load('images/icon.png'), (50, 50)))
 
 mixer.init()
 music = mixer.Channel(1)
-strike_sound, kick_sound, run_sound, key_sound, crystal_sound, obs_sound, teleport_sound, click_sound, chest_sound,\
-    game_sound, menu_sound, end_sound = mixer.Sound('sounds/strike.mp3'), mixer.Sound('sounds/lasers.mp3'),\
-    mixer.Sound('sounds/running.mp3'), mixer.Sound('sounds/backpack.mp3'), mixer.Sound('sounds/crystal.mp3'),\
-    mixer.Sound('sounds/remove.mp3'), mixer.Sound('sounds/teleport.wav'), mixer.Sound('sounds/click.wav'),\
-    mixer.Sound('sounds/metal.mp3'), mixer.Sound('sounds/game.mp3'), mixer.Sound('sounds/menu.mp3'),\
-    mixer.Sound('sounds/game_over.wav')
+strike_sound, kick_sound, fire_sound, run_sound, key_sound, crystal_sound, obs_sound, teleport_sound, click_sound,\
+    chest_sound, game_sound, menu_sound, end_sound, bonus_sound = mixer.Sound('sounds/strike.mp3'),\
+    mixer.Sound('sounds/lasers.mp3'),  mixer.Sound('sounds/fire.mp3'), mixer.Sound('sounds/running.mp3'),\
+    mixer.Sound('sounds/backpack.mp3'), mixer.Sound('sounds/crystal.mp3'), mixer.Sound('sounds/remove.mp3'),\
+    mixer.Sound('sounds/teleport.wav'), mixer.Sound('sounds/click.wav'), mixer.Sound('sounds/metal.mp3'),\
+    mixer.Sound('sounds/game.mp3'), mixer.Sound('sounds/menu.mp3'), mixer.Sound('sounds/game_over.wav'), \
+    mixer.Sound('sounds/bonus.mp3')
 crystal_sound.set_volume(0.3)
 
 
 class GameSprite(sprite.Sprite):
-    def __init__(self, x, y, i, speed=0):
+    def __init__(self, x, y, i, speed=0, side='right'):
         super().__init__()
         self.image = i
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = x, y
         self.speed = speed
+        self.side = side
 
     def update(self, camera):
         w.blit(self.image, camera.apply(self))
@@ -56,10 +63,6 @@ class Player(GameSprite):
     strikes = sprite.Group()
     state = 'move'  # move, climb
     running = mixer.Channel(2)
-
-    def __init__(self, x, y, img, speed, side):
-        GameSprite.__init__(self, x, y, img, speed)
-        self.side = side
 
     def move(self):
         keys = key.get_pressed()
@@ -121,9 +124,6 @@ class Player(GameSprite):
 
 
 class MovingSprite(GameSprite):
-    def __init__(self, x, y, img, speed, side):
-        GameSprite.__init__(self, x, y, img, speed)
-        self.side = side
 
     def update(self, camera):
         if self.side == 'right':
@@ -150,6 +150,37 @@ class Enemy(MovingSprite):
             self.rect.x -= self.speed
             self.image = transform.flip(images['enemy'][self.cur_frame], True, False)
         w.blit(self.image, camera.apply(self))
+
+
+class Sphere(GameSprite):
+
+    def update(self, camera):
+        self.rect.y += self.speed
+        w.blit(self.image, camera.apply(self))
+
+
+class Boss(MovingSprite):
+    rate = cur_frame = 0
+    spheres = sprite.Group()
+
+    def update(self, camera):
+        if self.rate == 3:  # walking animation
+            self.cur_frame += 1
+            self.rate = 0
+        if self.cur_frame == 8 and self.rate == 1:  # hitting starts
+            fire_sound.play()
+            self.spheres.add(Sphere(self.rect.centerx, self.rect.centery, choice(images['spheres']), 5))
+        if self.cur_frame == 11:
+            self.cur_frame = 0
+        self.rate += 1
+        if self.side == 'right':
+            self.rect.x += self.speed
+            self.image = images['boss'][self.cur_frame]
+        if self.side == 'left':
+            self.rect.x -= self.speed
+            self.image = transform.flip(images['boss'][self.cur_frame], True, False)
+        w.blit(self.image, camera.apply(self))
+        self.spheres.update(camera)
 
 
 class Camera(object):
@@ -354,12 +385,12 @@ class Level1(Level):
     level_height = len(level) * 40
 
     def __init__(self):
-        player = Player(300, 650, images['player']['shoot'], 10, 'right')
+        player = Player(300, 650, images['player']['shoot'], 10)
         super().__init__(player)
-        self.enemies.add(Enemy(400, 480, images['enemy'][0], 3, 'right'),
-                         Enemy(230, 320, images['enemy'][0], 3, 'right'),
-                         Enemy(1800, 160, images['enemy'][0], 3, 'right'),
-                         Enemy(1700, 320, images['enemy'][0], 3, 'right'))
+        self.enemies.add(Enemy(400, 480, images['enemy'][0], 3),
+                         Enemy(230, 320, images['enemy'][0], 3),
+                         Enemy(1800, 160, images['enemy'][0], 3),
+                         Enemy(1700, 320, images['enemy'][0], 3))
         self.obs.add(GameSprite(1000, 580, images['obs'][0]), GameSprite(2600, 580, images['obs'][0]))
         self.chest_keys.add(GameSprite(210, 340, images['key']), GameSprite(1600, 340, images['key']))
         self.chests.add(GameSprite(450, 150, images['chest_closed']), GameSprite(1400, 150, images['chest_closed']))
@@ -394,18 +425,45 @@ class Level2(Level):
     level_height = len(level) * 40
 
     def __init__(self):
-        super().__init__(Player(300, 810, images['player']['shoot'], 10, 'right'))
-        self.enemies.add(Enemy(400, 640, images['enemy'][0], 3, 'right'),
-                         Enemy(230, 320, images['enemy'][0], 3, 'right'),
-                         Enemy(1800, 160, images['enemy'][0], 3, 'right'),
-                         Enemy(1700, 320, images['enemy'][0], 3, 'right'),
+        super().__init__(Player(300, 810, images['player']['shoot'], 10))
+        self.enemies.add(Enemy(400, 640, images['enemy'][0], 3),
+                         Enemy(230, 320, images['enemy'][0], 3),
+                         Enemy(1800, 160, images['enemy'][0], 3),
+                         Enemy(1700, 320, images['enemy'][0], 3),
                          Enemy(1700, 480, transform.flip(images['enemy'][0], True, False), 3, 'left'),
                          Enemy(1700, 640, transform.flip(images['enemy'][0], True, False), 3, 'left'),
-                         Enemy(230, 480, images['enemy'][0], 3, 'right'))
+                         Enemy(230, 480, images['enemy'][0], 3))
         self.obs.add(GameSprite(1700, 410, images['obs'][0]), GameSprite(1000, 100, images['obs'][0]))
         self.chest_keys.add(GameSprite(2350, 500, images['key']), GameSprite(600, 500, images['key']))
         self.chests.add(GameSprite(250, 640, images['chest_closed']))
         self.portal = GameSprite(100, 100, images['portal'])
+
+
+class Bonus(Level):
+    level = [
+        "l                                      r",
+        "l                                      r",
+        "l                                      r",
+        "l--------------------------------------r",
+        "ll|r                                   r",
+        "l                                      r",
+        "l                  °                   r",
+        "l--------------------------------------r",
+        "l                                   l|rr",
+        "l                                      r",
+        "l                                      r",
+        "l--------------------------------------r",
+        "ll|r                                   r",
+        "l                                      r",
+        "l                                      r",
+        "l--------------------------------------r"]
+    level_width = len(level[0]) * 40
+    level_height = len(level) * 40
+
+    def __init__(self):
+        super().__init__(Player(400, 560, images['player']['shoot'], 10))
+        self.boss = Boss(100, 50, images['boss'][0], 5, 'right')
+        self.enemies.add(self.boss)  # consists of Boss & spheres to check collision
 
 
 class Button:
@@ -432,10 +490,15 @@ xy = [(ww / 2, 300), (ww / 2, 450), (ww / 2, 600)]  # menu buttons' coordinates
 
 def level_play(restart=True):
     global run, cur_level, level
+    if cur_level == 3:
+        return 'bonus'
     if restart:
         if level:
             level.clear()
-        level = Level1() if cur_level == 1 else Level2()
+        if cur_level == 1:
+            level = Level1()
+        elif cur_level == 2:
+            level = Level2()
         if music.get_sound() != game_sound:
             music.play(game_sound, -1)
     btn_pause = Button((1200, 15), 'I I', 50, 50, magenta)
@@ -555,7 +618,7 @@ def rules():
 def level_complete(result):
     global run, cur_level, level
     game_state = 0  # 0 - level was completed, 1 - won, 2 - lost
-    if result == 'win' and cur_level == 2:
+    if result == 'win' and cur_level == 3:
         game_state = 1
     elif result == 'loose':
         game_state = 2
@@ -565,10 +628,10 @@ def level_complete(result):
     headers = [f.render(f'LEVEL {cur_level} DONE', True, purple, red), f.render('YOU WON', True, purple, red),
                f.render('YOU LOST', True, purple, red)]
     elements = []
-    if not game_state:
-        elements = [Button(xy[0], 'RESTART'), Button(xy[1], 'NEXT LEVEL'), Button(xy[2], 'BACK TO MENU')]
-    else:
+    if game_state:
         elements = [Button(xy[0], 'RESTART'), Button(xy[1], 'HOW TO PLAY'), Button(xy[2], 'BACK TO MENU')]
+    else:
+        elements = [Button(xy[0], 'RESTART'), Button(xy[1], 'NEXT LEVEL'), Button(xy[2], 'BACK TO MENU')]
     while run:
         for e in event.get():
             if e.type == QUIT:
@@ -597,8 +660,42 @@ def level_complete(result):
         clock.tick(30)
 
 
-# cur_state = 'menu', а взагалі є menu, rules, pause, level, win, loose
-cur_state = 'menu'
+def bonus_level():
+    global run, level
+    if music.get_sound() != bonus_sound:
+        music.play(bonus_sound, -1)
+    header = f.render('BONUS LEVEL', True, purple, red)
+    w.blit(images['back'], (0, 0))
+    w.blit(header, ((ww - header.get_width()) / 2, (wh - header.get_height()) / 2))  # header
+    display.update()
+    timer.sleep(2)
+    if level:
+        level.boss.spheres.empty()
+        level.enemies.empty()
+    level = Bonus()
+    while run:
+        for e in event.get():
+            if e.type == QUIT:
+                run = False
+        level.enemies.add(level.boss.spheres)
+        w.blit(images['back'], (0, 0))
+        if not level.update():
+            if level.player.running.get_busy():
+                level.player.running.stop()
+            return 'loose'
+        w.blit(images['crystal'], (10, 10))
+        w.blit(f3.render(f': {level.player.ammunition}', True, white), (60, 10))
+        if not level.enemies.has(level.boss):
+            if level.player.running.get_busy():
+                level.player.running.stop()
+            return 'win'
+        display.update()
+        clock.tick(30)
+
+
+# cur_state = 'menu', а взагалі є menu, rules, pause, level, win, loose, bonus
+cur_state = 'bonus'
+cur_level = 3
 while run:  # switcher
     for e in event.get():
         if e.type == QUIT:
@@ -615,5 +712,7 @@ while run:  # switcher
         cur_state = level_complete('win')
     elif cur_state == 'loose':
         cur_state = level_complete('loose')
+    elif cur_state == 'bonus':
+        cur_state = bonus_level()
     else:
         cur_state = level_play(False)
