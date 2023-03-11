@@ -124,7 +124,6 @@ class Player(GameSprite):
 
 
 class MovingSprite(GameSprite):
-
     def update(self, camera):
         if self.side == 'right':
             self.rect.x += self.speed
@@ -153,7 +152,6 @@ class Enemy(MovingSprite):
 
 
 class Sphere(GameSprite):
-
     def update(self, camera):
         self.rect.y += self.speed
         w.blit(self.image, camera.apply(self))
@@ -176,7 +174,7 @@ class Boss(MovingSprite):
         if self.side == 'right':
             self.rect.x += self.speed
             self.image = images['boss'][self.cur_frame]
-        if self.side == 'left':
+        elif self.side == 'left':
             self.rect.x -= self.speed
             self.image = transform.flip(images['boss'][self.cur_frame], True, False)
         w.blit(self.image, camera.apply(self))
@@ -426,16 +424,16 @@ class Level2(Level):
 
     def __init__(self):
         super().__init__(Player(300, 810, images['player']['shoot'], 10))
-        self.enemies.add(Enemy(400, 640, images['enemy'][0], 3),
-                         Enemy(230, 320, images['enemy'][0], 3),
-                         Enemy(1800, 160, images['enemy'][0], 3),
-                         Enemy(1700, 320, images['enemy'][0], 3),
-                         Enemy(1700, 480, transform.flip(images['enemy'][0], True, False), 3, 'left'),
-                         Enemy(1700, 640, transform.flip(images['enemy'][0], True, False), 3, 'left'),
-                         Enemy(230, 480, images['enemy'][0], 3))
-        self.obs.add(GameSprite(1700, 410, images['obs'][0]), GameSprite(1000, 100, images['obs'][0]))
-        self.chest_keys.add(GameSprite(2350, 500, images['key']), GameSprite(600, 500, images['key']))
-        self.chests.add(GameSprite(250, 640, images['chest_closed']))
+        # self.enemies.add(Enemy(400, 640, images['enemy'][0], 3),
+        #                  Enemy(230, 320, images['enemy'][0], 3),
+        #                  Enemy(1800, 160, images['enemy'][0], 3),
+        #                  Enemy(1700, 320, images['enemy'][0], 3),
+        #                  Enemy(1700, 480, transform.flip(images['enemy'][0], True, False), 3, 'left'),
+        #                  Enemy(1700, 640, transform.flip(images['enemy'][0], True, False), 3, 'left'),
+        #                  Enemy(230, 480, images['enemy'][0], 3))
+        # self.obs.add(GameSprite(1700, 410, images['obs'][0]), GameSprite(1000, 100, images['obs'][0]))
+        # self.chest_keys.add(GameSprite(2350, 500, images['key']), GameSprite(600, 500, images['key']))
+        # self.chests.add(GameSprite(250, 640, images['chest_closed']))
         self.portal = GameSprite(100, 100, images['portal'])
 
 
@@ -462,8 +460,8 @@ class Bonus(Level):
 
     def __init__(self):
         super().__init__(Player(400, 560, images['player']['shoot'], 10))
-        self.boss = Boss(100, 50, images['boss'][0], 5, 'right')
-        self.enemies.add(self.boss)  # consists of Boss & spheres to check collision
+        self.boss = Boss(100, 50, images['boss'][0], 5)
+        self.enemies.add(self.boss)
 
 
 class Button:
@@ -490,8 +488,6 @@ xy = [(ww / 2, 300), (ww / 2, 450), (ww / 2, 600)]  # menu buttons' coordinates
 
 def level_play(restart=True):
     global run, cur_level, level
-    if cur_level == 3:
-        return 'bonus'
     if restart:
         if level:
             level.clear()
@@ -628,10 +624,10 @@ def level_complete(result):
     headers = [f.render(f'LEVEL {cur_level} DONE', True, purple, red), f.render('YOU WON', True, purple, red),
                f.render('YOU LOST', True, purple, red)]
     elements = []
-    if game_state:
-        elements = [Button(xy[0], 'RESTART'), Button(xy[1], 'HOW TO PLAY'), Button(xy[2], 'BACK TO MENU')]
-    else:
+    if not game_state:
         elements = [Button(xy[0], 'RESTART'), Button(xy[1], 'NEXT LEVEL'), Button(xy[2], 'BACK TO MENU')]
+    else:
+        elements = [Button(xy[0], 'RESTART'), Button(xy[1], 'HOW TO PLAY'), Button(xy[2], 'BACK TO MENU')]
     while run:
         for e in event.get():
             if e.type == QUIT:
@@ -640,14 +636,22 @@ def level_complete(result):
                 x, y = mouse.get_pos()
                 if elements[0].rect.collidepoint(x, y):
                     click_sound.play()
-                    if game_state == 1:
+                    if game_state == 1:  # won on the last level
                         cur_level = 1
-                    return 'level'
+                        return 'level'
+                    elif cur_level < 3:
+                        return 'level'
+                    else:
+                        return 'bonus'
                 elif elements[1].rect.collidepoint(x, y):
                     click_sound.play()
                     if not game_state:
-                        cur_level += 1
-                        return 'level'
+                        if cur_level < 2:
+                            cur_level += 1
+                            return 'level'
+                        else:
+                            cur_level += 1
+                            return 'bonus'
                     return 'rules'
                 elif elements[2].rect.collidepoint(x, y):
                     click_sound.play()
@@ -666,13 +670,17 @@ def bonus_level():
         music.play(bonus_sound, -1)
     header = f.render('BONUS LEVEL', True, purple, red)
     w.blit(images['back'], (0, 0))
-    w.blit(header, ((ww - header.get_width()) / 2, (wh - header.get_height()) / 2))  # header
+    w.blit(header, ((ww - header.get_width()) / 2, (wh - header.get_height()) / 2))
     display.update()
     timer.sleep(2)
-    if level:
-        level.boss.spheres.empty()
+    if type(level) is Level2:  # if bonus level was launched for the first time
+        a = level.player.ammunition
+        level = Bonus()
+        level.player.ammunition = a
+    elif not level.enemies.has(level.boss):  # if bonus level was restarted
         level.enemies.empty()
-    level = Bonus()
+        level.boss.spheres.empty()
+        level = Bonus()
     while run:
         for e in event.get():
             if e.type == QUIT:
@@ -693,9 +701,8 @@ def bonus_level():
         clock.tick(30)
 
 
-# cur_state = 'menu', а взагалі є menu, rules, pause, level, win, loose, bonus
-cur_state = 'bonus'
-cur_level = 3
+# cur_state = 'menu', all statuses: menu, rules, pause, level, win, loose, bonus
+cur_state = 'menu'
 while run:  # switcher
     for e in event.get():
         if e.type == QUIT:
