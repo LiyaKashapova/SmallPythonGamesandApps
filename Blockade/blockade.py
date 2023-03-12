@@ -424,16 +424,16 @@ class Level2(Level):
 
     def __init__(self):
         super().__init__(Player(300, 810, images['player']['shoot'], 10))
-        # self.enemies.add(Enemy(400, 640, images['enemy'][0], 3),
-        #                  Enemy(230, 320, images['enemy'][0], 3),
-        #                  Enemy(1800, 160, images['enemy'][0], 3),
-        #                  Enemy(1700, 320, images['enemy'][0], 3),
-        #                  Enemy(1700, 480, transform.flip(images['enemy'][0], True, False), 3, 'left'),
-        #                  Enemy(1700, 640, transform.flip(images['enemy'][0], True, False), 3, 'left'),
-        #                  Enemy(230, 480, images['enemy'][0], 3))
-        # self.obs.add(GameSprite(1700, 410, images['obs'][0]), GameSprite(1000, 100, images['obs'][0]))
-        # self.chest_keys.add(GameSprite(2350, 500, images['key']), GameSprite(600, 500, images['key']))
-        # self.chests.add(GameSprite(250, 640, images['chest_closed']))
+        self.enemies.add(Enemy(400, 640, images['enemy'][0], 3),
+                         Enemy(230, 320, images['enemy'][0], 3),
+                         Enemy(1800, 160, images['enemy'][0], 3),
+                         Enemy(1700, 320, images['enemy'][0], 3),
+                         Enemy(1700, 480, transform.flip(images['enemy'][0], True, False), 3, 'left'),
+                         Enemy(1700, 640, transform.flip(images['enemy'][0], True, False), 3, 'left'),
+                         Enemy(230, 480, images['enemy'][0], 3))
+        self.obs.add(GameSprite(1700, 410, images['obs'][0]), GameSprite(1000, 100, images['obs'][0]))
+        self.chest_keys.add(GameSprite(2350, 500, images['key']), GameSprite(600, 500, images['key']))
+        self.chests.add(GameSprite(250, 640, images['chest_closed']))
         self.portal = GameSprite(100, 100, images['portal'])
 
 
